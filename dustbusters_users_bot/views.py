@@ -1,16 +1,16 @@
 import os
-import time
-import telebot
+import sys
 
 from django.views import View
 from django.http import HttpResponse
 
 from dustbusters_users_bot.settings import BASE_DIR, DOMAIN
 
-from bot.bot import bot
 from bot.bot import *
+from bot.commands import *
 
 WEBHOOK_SSL_CERT = os.path.join(BASE_DIR, 'webhook_cert.pem')
+
 
 class ProcessWebhook(View):
     def post(self, request):

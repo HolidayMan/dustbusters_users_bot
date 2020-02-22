@@ -13,3 +13,6 @@ TOKEN = "<your token>"
 SECRET_KEY = '<your SECRET_KEY>' # django SECRET_KEY
 
 DOMAIN = 'my_domain'
+
+STATES_FILE = os.path.join(BASE_DIR, "states.vdb")
+LOG_FILE = os.path.join(BASE_DIR, "bot.log")

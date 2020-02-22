@@ -132,3 +132,4 @@ dmypy.json
 bot.log
 
 *.pem
+*.vdb

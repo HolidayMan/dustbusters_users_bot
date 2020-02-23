@@ -27,7 +27,7 @@ def authorize_user(message):
             return bot.send_message(message.chat.id, ph.YOU_WERE_AUTHORIZED_AS % new_contact.phone_number, parse_mode="HTML", reply_markup=MENU_KEYBOARD)
         else:
             bot.register_next_step_handler(message, authorize_user)
-            return bot.send_message(message.chat.id, ph.INVALID_CONTACT, reply_markup=AUTHORIZE_KEYBOARD)
+            return bot.send_message(message.chat.id, ph.INVALID_CONTACT, parse_mode="HTML", reply_markup=AUTHORIZE_KEYBOARD)
     else:
         bot.register_next_step_handler(message, authorize_user)
-        return bot.send_message(message.chat.id, ph.INVALID_CONTACT, reply_markup=AUTHORIZE_KEYBOARD)
+        return bot.send_message(message.chat.id, ph.INVALID_CONTACT, parse_mode="HTML", reply_markup=AUTHORIZE_KEYBOARD)

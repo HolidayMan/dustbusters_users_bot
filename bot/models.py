@@ -1,3 +1,5 @@
+from enum import Enum
+
 from django.db import models
 import bot.exeptions as exceptions
 
@@ -42,3 +44,64 @@ class TgUser(models.Model):
             return self.username
         else:
             return str(self.id)
+
+
+class Prices(Enum):
+    PRICE_WITHOUT_WINDOWS = 150
+    PRICE_WITH_WINDOWS = 250
+    PICE_HARD_WORD = 1000
+    PRICE_KEYS_DELIVERY = 500
+    PRICE_VERY_DIRTY = 1000
+    PRICE_DAY_TRIP = 0
+    PRICE_EVENING_TRIP = 1000
+    PRICE_NIGHT_TRIP = 2000
+
+
+class CleaningOrder(models.Model):
+    type = models.IntegerField()
+    square_metres = models.IntegerField(blank=True)
+    trip = models.IntegerField(blank=True)
+    date = models.DateField(blank=True)
+    time = models.TimeField(blank=True)
+    additional_service = models.BooleanField(blank=True)
+    hard_work = models.BooleanField(default=False)
+    keys_delivery = models.BooleanField(default=False)
+    very_dirty = models.BooleanField(default=False)
+
+    TYPE_WITHOUT_WINDOWS = 0
+    TYPE_WITH_WINDOWS = 1
+
+    DAY_TRIP = 0
+    EVENING_TRIP = 1
+    NIGHT_TRIP = 2
+
+    def get_per_metre_price(self):
+        if self.type == self.TYPE_WITH_WINDOWS:
+            return Prices.PRICE_WITH_WINDOWS.value
+        else:
+            return Prices.PRICE_WITHOUT_WINDOWS.value
+
+    def get_trip_price(self):
+        if self.trip == self.DAY_TRIP:
+            return Prices.PRICE_DAY_TRIP.value
+        elif self.trip == self.EVENING_TRIP:
+            return Prices.PRICE_EVENING_TRIP.value
+        else:
+            return Prices.PRICE_NIGHT_TRIP.value
+
+    def get_additional_service_price(self):
+        price = 0
+        if self.hard_work:
+            price += Prices.PICE_HARD_WORD.value
+        if self.keys_delivery:
+            price += Prices.PRICE_KEYS_DELIVERY.value
+        if self.very_dirty:
+            price += Prices.PRICE_VERY_DIRTY.value
+        return price
+
+    def calc_price(self):
+        price = 0
+        price += self.square_metres * self.get_per_metre_price()
+        price += self.get_trip_price()
+        price += self.get_additional_service_price()
+        return price

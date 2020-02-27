@@ -2,11 +2,22 @@ from .bot import bot
 from .keyboards import *
 import bot.phrases as ph
 from .handlers import handle_back_to_menu
+from .models import CleaningOrder
+from .utils import get_keyboards_buttons_text, get_last_db_obj
 
 
-@handle_back_to_menu
+@handle_back_to_menu(delete=True, model=CleaningOrder) # TODO: add this handler to dispatcher
 def handle_cleaning_type(message):
-    pass
+    if message.text in get_keyboards_buttons_text(CLEANING_TYPE_KEYBOARD):
+        bot.register_next_step_handler(message, handle_cleaning_type)
+        return bot.send_message(message.chat.id, ph.INVALID_CLEANING_TYPE, parse_mode="HTML")
+
+    order = get_last_db_obj(model=CleaningOrder, user=message.chat)
+    order.type = message.text
+    order.save()
+
+    bot.register_next_step_handler(message, handle_place_size)
+    return bot.send_message(message.chat.id, ph.ENTER_PLACE_SIZE, parse_mode="HTML", reply_markup=deleteKeyboard)
 
 
 @handle_back_to_menu

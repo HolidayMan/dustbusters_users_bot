@@ -1,3 +1,5 @@
+from telebot import types
+
 from vedis import Vedis
 
 from .models import TgUser, Contact
@@ -46,3 +48,11 @@ def set_menu_state(user_id):
             return True
         except:
             return False
+
+
+def get_keyboards_buttons_text(keyboard: types.ReplyKeyboardMarkup):
+    return [button['text'] for row in keyboard.keyboard for button in row]
+
+
+def get_last_db_obj(model, user: types.Chat):
+    return model.objects.filter(user=user).order_by("-id")[0]

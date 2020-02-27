@@ -8,6 +8,7 @@ from dustbusters_users_bot.settings import BASE_DIR, DOMAIN
 
 from bot.bot import *
 from bot.commands import *
+from bot.dispatchers import *
 
 WEBHOOK_SSL_CERT = os.path.join(BASE_DIR, 'webhook_cert.pem')
 

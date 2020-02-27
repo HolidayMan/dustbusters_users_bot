@@ -12,7 +12,7 @@ class Contact(models.Model):
     phone_number = models.CharField(max_length=16)
     first_name = models.CharField(max_length=64, blank=True, null=True)
     last_name = models.CharField(max_length=64, blank=True, null=True)
-    user = models.OneToOneField("TgUser", on_delete=models.CASCADE)
+    user = models.OneToOneField("TgUser", on_delete=models.CASCADE, related_name="contact")
 
     @classmethod
     def create_from_contact(cls, contact):
@@ -58,15 +58,16 @@ class Prices(Enum):
 
 
 class CleaningOrder(models.Model):
-    type = models.IntegerField()
-    square_metres = models.IntegerField(blank=True)
-    trip = models.IntegerField(blank=True)
-    date = models.DateField(blank=True)
-    time = models.TimeField(blank=True)
-    additional_service = models.BooleanField(blank=True)
+    type = models.IntegerField(blank=True, null=True)
+    square_metres = models.IntegerField(blank=True, null=True)
+    trip = models.IntegerField(blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    time = models.TimeField(blank=True, null=True)
+    additional_service = models.BooleanField(blank=True, null=True)
     hard_work = models.BooleanField(default=False)
     keys_delivery = models.BooleanField(default=False)
     very_dirty = models.BooleanField(default=False)
+    user = models.ForeignKey("TgUser", on_delete=models.CASCADE, related_name="cleaning_orders")
 
     TYPE_WITHOUT_WINDOWS = 0
     TYPE_WITH_WINDOWS = 1

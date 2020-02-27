@@ -14,5 +14,8 @@ AUTHORIZE_KEYBOARD.add(AUTHORIZE_BUTTON)
 MENU_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
 MENU_KEYBOARD.add(MAKE_CLEANING_ORDER_BUTTON)
 
-CLEANING_TYPE_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+CLEANING_TYPE_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1, one_time_keyboard=True)
 CLEANING_TYPE_KEYBOARD.add(CLEANING_WITHOUT_WINDOWS, CLEANING_WITH_WINDOWS, BACK_TO_MENU_BUTTON)
+
+PLACE_SIZE_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+PLACE_SIZE_KEYBOARD.add(BACK_TO_MENU_BUTTON)

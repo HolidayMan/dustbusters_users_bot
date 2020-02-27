@@ -20,13 +20,18 @@ class CleaningOrderAdmin(admin.ModelAdmin):
     def display_type(self, obj):
         if obj.type == obj.TYPE_WITH_WINDOWS:
             return "Уборка с окнами"
-        else:
+        elif obj.type == obj.TYPE_WITHOUT_WINDOWS:
             return "Уборка без окон"
+        else:
+            return "Не выбрано"
 
     def display_trip(self, obj):
         if obj.trip == obj.DAY_TRIP:
-            return Prices.PRICE_DAY_TRIP.value
+            return "День"
         elif obj.trip == obj.EVENING_TRIP:
-            return Prices.PRICE_EVENING_TRIP.value
+            return "Вечер"
         else:
-            return Prices.PRICE_NIGHT_TRIP.value
+            return "Ночь"
+
+    display_type.short_description = "Cleaning type"
+    display_trip.short_description = "Trip time"

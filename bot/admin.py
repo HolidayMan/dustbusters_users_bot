@@ -14,7 +14,7 @@ class TgUserAdmin(admin.ModelAdmin):
 
 @admin.register(CleaningOrder)
 class CleaningOrderAdmin(admin.ModelAdmin):
-    list_display = ("display_type", "square_metres", "display_trip", "date", "time",
+    list_display = ("display_type", "user", "square_metres", "display_trip", "date", "time",
                     "additional_service", "hard_work", "keys_delivery", "very_dirty")
 
     def display_type(self, obj):

@@ -19,3 +19,6 @@ CLEANING_TYPE_KEYBOARD.add(CLEANING_WITHOUT_WINDOWS, CLEANING_WITH_WINDOWS, BACK
 
 PLACE_SIZE_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
 PLACE_SIZE_KEYBOARD.add(BACK_TO_MENU_BUTTON)
+
+BACK_TO_MENU_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+BACK_TO_MENU_KEYBOARD.add(BACK_TO_MENU_BUTTON)

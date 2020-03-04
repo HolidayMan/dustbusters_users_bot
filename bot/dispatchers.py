@@ -6,7 +6,7 @@ from .utils import create_obj
 from .models import CleaningOrder
 
 
-@bot.message_handler(func=lambda message: message.text == MAKE_CLEANING_ORDER_BUTTON.text)  # TODO: pickle can't save locals and pyTelegramBotAPI uses pickle
+@bot.message_handler(func=lambda message: message.text == MAKE_CLEANING_ORDER_BUTTON.text)
 @create_obj(CleaningOrder)
 def make_cleaning_order(message):
     bot.register_next_step_handler(message, handle_cleaning_type)

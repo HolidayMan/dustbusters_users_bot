@@ -8,8 +8,8 @@ from .models import CleaningOrder
 from .utils import get_keyboards_buttons_text, get_last_db_obj, get_trip_type_from_name, has_message_text
 
 
-def get_tomorrow_date():
-    one_day = timedelta(day=1)
+def get_tomorrow_date() -> datetime:
+    one_day = timedelta(days=1)
     return datetime.utcnow() + one_day
 
 
@@ -61,7 +61,7 @@ def handle_time_range(message):
     order.save()
     bot.register_next_step_handler(message, handle_cleaning_date)
     return (bot.send_message(message.chat.id, ph.SHOW_PRICE % order.calc_price(), parse_mode="HTML"),
-            bot.send_message(message.chat.id, ph.ENTER_DATE, parse_mode="HTML", reply_markup=BACK_TO_MENU_KEYBOARD))
+            bot.send_message(message.chat.id, ph.ENTER_DATE % get_tomorrow_date().strftime("%d.%m.%Y"), parse_mode="HTML", reply_markup=BACK_TO_MENU_KEYBOARD))
 
 
 @handle_back_to_menu

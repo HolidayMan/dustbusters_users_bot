@@ -2,6 +2,7 @@ from enum import Enum
 
 from django.db import models
 import bot.exeptions as exceptions
+from .keyboards import DAY_TRIP_BUTTON, EVENING_TRIP_BUTTON,  NIGHT_TRIP_BUTTON
 
 
 def cut_phone_number(phone_number):
@@ -76,6 +77,15 @@ class CleaningOrder(models.Model):
     EVENING_TRIP = 1
     NIGHT_TRIP = 2
 
+    @staticmethod
+    def get_trip_type(trip_name):
+        trip_types = {
+            DAY_TRIP_BUTTON.text: 0,
+            EVENING_TRIP_BUTTON.text: 1,
+            NIGHT_TRIP_BUTTON.text: 2
+        }
+        return trip_types[trip_name]
+
     def get_per_metre_price(self):
         if self.type == self.TYPE_WITH_WINDOWS:
             return Prices.PRICE_WITH_WINDOWS.value
@@ -87,8 +97,10 @@ class CleaningOrder(models.Model):
             return Prices.PRICE_DAY_TRIP.value
         elif self.trip == self.EVENING_TRIP:
             return Prices.PRICE_EVENING_TRIP.value
-        else:
+        elif self.trip == self.NIGHT_TRIP:
             return Prices.PRICE_NIGHT_TRIP.value
+        else:
+            return 0
 
     def get_additional_service_price(self):
         price = 0

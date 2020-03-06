@@ -71,3 +71,7 @@ def create_obj(model):
 def get_trip_type_from_name(text_type):
     buttons = get_keyboards_buttons_text(CLEANING_TYPE_KEYBOARD)
     return buttons.index(text_type)
+
+
+def has_message_text(message):
+    return bool(message.text)

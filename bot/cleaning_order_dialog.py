@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 
 from .bot import bot
@@ -9,7 +10,7 @@ from .utils import get_keyboards_buttons_text, get_last_db_obj, get_trip_type_fr
 
 
 def get_tomorrow_date() -> datetime:
-    one_day = timedelta(days=1)
+    one_day = timedelta(days=1, hours=3)
     return datetime.utcnow() + one_day
 
 
@@ -64,12 +65,38 @@ def handle_time_range(message):
             bot.send_message(message.chat.id, ph.ENTER_DATE % get_tomorrow_date().strftime("%d.%m.%Y"), parse_mode="HTML", reply_markup=BACK_TO_MENU_KEYBOARD))
 
 
-@handle_back_to_menu
+@handle_back_to_menu(delete=True, model=CleaningOrder)
 def handle_cleaning_date(message):
-    pass
+    pattern = r'^([0-2][1-9]|3[0-1])\.(0[1-9]|[1-2][0-2])\.2\d\d\d$'
+    if not has_message_text(message) or not re.match(pattern, message.text):
+        bot.register_next_step_handler(message, handle_cleaning_date)
+        return bot.send_message(message.chat.id, ph.INVALID_DATE, parse_mode="HTML")
+
+    order_date = datetime.strptime(message.text, "%d.%m.%Y").date()
+    today = (datetime.utcnow() + timedelta(hours=3)).date()
+
+    if not today < order_date:
+        bot.register_next_step_handler(message, handle_cleaning_date)
+        return bot.send_message(message.chat.id, ph.PAST_DATE, parse_mode="HTML")
+
+    order = get_last_db_obj(model=CleaningOrder, user=message.chat)
+    order.date = order_date
+    order.save()
+
+    if order.trip == CleaningOrder.DAY_TRIP:
+        time_to_format = "12:00"
+    elif order.trip == CleaningOrder.EVENING_TRIP:
+        time_to_format = "17:00"
+    elif order.trip == CleaningOrder.NIGHT_TRIP:
+        time_to_format = "04:00"
+
+    bot.register_next_step_handler(message, handle_cleaning_date)
+    return (bot.send_message(message.chat.id, ph.SHOW_PRICE % order.calc_price(), parse_mode="HTML"),
+            bot.send_message(message.chat.id, ph.ENTER_TIME % time_to_format,
+                             parse_mode="HTML", reply_markup=BACK_TO_MENU_KEYBOARD))
 
 
-@handle_back_to_menu
+@handle_back_to_menu(delete=True, model=CleaningOrder)
 def handle_cleaning_time(message):
     pass
 

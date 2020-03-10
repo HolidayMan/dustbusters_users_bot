@@ -1,9 +1,7 @@
-from enum import Enum
-
 from django.db import models
 import bot.exeptions as exceptions
 from .keyboards import DAY_TRIP_BUTTON, EVENING_TRIP_BUTTON,  NIGHT_TRIP_BUTTON
-
+from .prices import Prices
 
 def cut_phone_number(phone_number):
     return phone_number.replace('+', '')
@@ -45,17 +43,6 @@ class TgUser(models.Model):
             return self.username
         else:
             return str(self.id)
-
-
-class Prices(Enum):
-    PRICE_WITHOUT_WINDOWS = 150
-    PRICE_WITH_WINDOWS = 250
-    PICE_HARD_WORD = 1000
-    PRICE_KEYS_DELIVERY = 500
-    PRICE_VERY_DIRTY = 1000
-    PRICE_DAY_TRIP = 0
-    PRICE_EVENING_TRIP = 1000
-    PRICE_NIGHT_TRIP = 2000
 
 
 class CleaningOrder(models.Model):
@@ -105,7 +92,7 @@ class CleaningOrder(models.Model):
     def get_additional_service_price(self):
         price = 0
         if self.hard_work:
-            price += Prices.PICE_HARD_WORD.value
+            price += Prices.PRICE_HARD_WORD.value
         if self.keys_delivery:
             price += Prices.PRICE_KEYS_DELIVERY.value
         if self.very_dirty:

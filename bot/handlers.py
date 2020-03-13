@@ -1,6 +1,6 @@
 from .bot import bot
 import bot.phrases as ph
-from .utils import set_menu_state, get_last_db_obj
+from bot.business_services.utils import set_menu_state, get_last_db_obj
 from .keyboards import BACK_TO_MENU_BUTTON, MENU_KEYBOARD
 
 

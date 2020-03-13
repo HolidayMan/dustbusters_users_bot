@@ -6,8 +6,8 @@ from .keyboards import *
 import bot.phrases as ph
 from .handlers import handle_back_to_menu, back_to_menu_handler
 from .models import CleaningOrder
-from .utils import (get_keyboards_buttons_text, get_last_db_obj, get_trip_type_from_name,
-                    has_message_text, set_state, set_menu_state, get_current_state)
+from bot.business_services.utils import (get_keyboards_buttons_text, get_last_db_obj, get_trip_type_from_name,
+                                         has_message_text, set_state, get_current_state)
 from .states import States
 
 

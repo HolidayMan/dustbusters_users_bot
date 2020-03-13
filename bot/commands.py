@@ -1,6 +1,6 @@
 from .bot import bot
 import bot.phrases as ph
-from .utils import create_user, user_exists, contact_exists, set_menu_state
+from bot.business_services.utils import create_user, user_exists, contact_exists, set_menu_state
 from .models import Contact
 from .keyboards import AUTHORIZE_KEYBOARD, MENU_KEYBOARD
 

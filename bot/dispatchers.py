@@ -2,7 +2,7 @@
 # from .keyboards import MAKE_CLEANING_ORDER_BUTTON, CLEANING_TYPE_KEYBOARD
 # import bot.phrases as ph
 from .cleaning_order_dialog import *
-from .utils import create_obj
+from bot.business_services.utils import create_obj
 from .models import CleaningOrder
 
 

@@ -2,10 +2,10 @@ from telebot import types
 
 from vedis import Vedis
 
-from .models import TgUser, Contact
+from bot.models import TgUser, Contact
 from dustbusters_users_bot.settings import STATES_FILE
-from .states import States
-from .keyboards import CLEANING_TYPE_KEYBOARD
+from bot.states import States
+from bot.keyboards import CLEANING_TYPE_KEYBOARD
 
 def user_exists(message) -> bool:
     return TgUser.objects.filter(tg_id=message.chat.id).exists()

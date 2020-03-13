@@ -1,5 +1,5 @@
 from telebot import types
-from .prices import Prices
+from bot.business_services.prices import CleaningPrices
 
 AUTHORIZE_BUTTON = types.KeyboardButton("Авторизоваться", request_contact=True)
 MAKE_CLEANING_ORDER_BUTTON = types.KeyboardButton("Заказать уборку")
@@ -7,9 +7,9 @@ MAKE_CLEANING_ORDER_BUTTON = types.KeyboardButton("Заказать уборку
 CLEANING_WITHOUT_WINDOWS = types.KeyboardButton("Уборка квартиры без помывки окон (150 руб/м²)")
 CLEANING_WITH_WINDOWS = types.KeyboardButton("Уборка квартиры с помывкой окон (250 руб/м²)")
 
-DAY_TRIP_BUTTON = types.KeyboardButton(f"Дневной выезд 9:00 — 15:00 ({Prices.PRICE_DAY_TRIP} ₽)")
-EVENING_TRIP_BUTTON = types.KeyboardButton(f"Вечерний выезд 16:00 — 21:00 ({Prices.PRICE_EVENING_TRIP} ₽)")
-NIGHT_TRIP_BUTTON = types.KeyboardButton(f"Ночной выезд 22:00 — 8:00 ({Prices.PRICE_NIGHT_TRIP} ₽)")
+DAY_TRIP_BUTTON = types.KeyboardButton(f"Дневной выезд 9:00 — 15:00 ({CleaningPrices.PRICE_DAY_TRIP} ₽)")
+EVENING_TRIP_BUTTON = types.KeyboardButton(f"Вечерний выезд 16:00 — 21:00 ({CleaningPrices.PRICE_EVENING_TRIP} ₽)")
+NIGHT_TRIP_BUTTON = types.KeyboardButton(f"Ночной выезд 22:00 — 8:00 ({CleaningPrices.PRICE_NIGHT_TRIP} ₽)")
 
 YES_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Да✅", callback_data="additional_service_accepted")
 NO_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Нет🚫", callback_data="additional_service_declined")

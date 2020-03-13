@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Prices(Enum):
+class CleaningPrices(Enum):
     PRICE_WITHOUT_WINDOWS = 90
     PRICE_WITH_WINDOWS = 70
     PRICE_HARD_WORD = 1000

@@ -1,6 +1,3 @@
-# from .bot import bot
-# from .keyboards import MAKE_CLEANING_ORDER_BUTTON, CLEANING_TYPE_KEYBOARD
-# import bot.phrases as ph
 from .cleaning_order_dialog import *
 from bot.business_services.utils import create_obj
 from .models import CleaningOrder

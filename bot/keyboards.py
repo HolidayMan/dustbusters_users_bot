@@ -1,15 +1,18 @@
 from telebot import types
-from bot.business_services.prices import CleaningPrices
+from bot.business_services.utils import get_cleanings_names
+from bot.business_services.enums import VisitNames, CleaningWindowsNames
 
 AUTHORIZE_BUTTON = types.KeyboardButton("Авторизоваться", request_contact=True)
 MAKE_CLEANING_ORDER_BUTTON = types.KeyboardButton("Заказать уборку")
 
-CLEANING_WITHOUT_WINDOWS = types.KeyboardButton("Уборка квартиры без помывки окон (150 руб/м²)")
-CLEANING_WITH_WINDOWS = types.KeyboardButton("Уборка квартиры с помывкой окон (250 руб/м²)")
+WITHOUT_WINDOWS_BUTTON = types.KeyboardButton(CleaningWindowsNames.WITHOUT_WINDOWS.value)
+WITH_WINDOWS_BUTTON = types.KeyboardButton(CleaningWindowsNames.WITH_WINDOWS.value)
 
-DAY_TRIP_BUTTON = types.KeyboardButton(f"Дневной выезд 9:00 — 15:00 ({CleaningPrices.PRICE_DAY_TRIP} ₽)")
-EVENING_TRIP_BUTTON = types.KeyboardButton(f"Вечерний выезд 16:00 — 21:00 ({CleaningPrices.PRICE_EVENING_TRIP} ₽)")
-NIGHT_TRIP_BUTTON = types.KeyboardButton(f"Ночной выезд 22:00 — 8:00 ({CleaningPrices.PRICE_NIGHT_TRIP} ₽)")
+SOFT_CLEANING_BUTTON = types.KeyboardButton("Уборка квартиры без помывки окон (%s руб/м²)")
+
+DAY_VISIT_BUTTON = types.KeyboardButton(VisitNames.DAY_VISIT.value)
+EVENING_VISIT_BUTTON = types.KeyboardButton(VisitNames.EVENING_VISIT.value)
+NIGHT_VISIT_BUTTON = types.KeyboardButton(VisitNames.NIGHT_VISIT.value)
 
 YES_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Да✅", callback_data="additional_service_accepted")
 NO_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Нет🚫", callback_data="additional_service_declined")
@@ -27,13 +30,29 @@ MENU_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
 MENU_KEYBOARD.add(MAKE_CLEANING_ORDER_BUTTON)
 
 CLEANING_TYPE_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1, one_time_keyboard=True)
-CLEANING_TYPE_KEYBOARD.add(CLEANING_WITHOUT_WINDOWS, CLEANING_WITH_WINDOWS, BACK_TO_MENU_BUTTON)
+CLEANING_TYPE_KEYBOARD.add(*get_cleanings_names(), BACK_TO_MENU_BUTTON)
+
+WINDOWS_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1, one_time_keyboard=True)
+WINDOWS_KEYBOARD.add(WITHOUT_WINDOWS_BUTTON, WITH_WINDOWS_BUTTON, BACK_TO_MENU_BUTTON)
 
 PLACE_SIZE_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
 PLACE_SIZE_KEYBOARD.add(BACK_TO_MENU_BUTTON)
 
 TIME_RANGE_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1, one_time_keyboard=True)
-TIME_RANGE_KEYBOARD.add(DAY_TRIP_BUTTON, EVENING_TRIP_BUTTON, NIGHT_TRIP_BUTTON, BACK_TO_MENU_BUTTON)
+TIME_RANGE_KEYBOARD.add(DAY_VISIT_BUTTON, EVENING_VISIT_BUTTON, NIGHT_VISIT_BUTTON, BACK_TO_MENU_BUTTON)
 
 ADDSERVICE_KEYBOARD = types.InlineKeyboardMarkup(row_width=2)
 ADDSERVICE_KEYBOARD.add(YES_ADDSERVICE_BUTTON, NO_ADDSERVICE_BUTTON, ADDSERVICE_BACK_TO_MENU_BUTTON)
+
+
+def build_keyboard_with_prices(keyboard, prices):
+    buttons = [types.KeyboardButton(json[0]['text']) for json in keyboard.keyboard]
+    changed_buttons = [types.KeyboardButton(button.text % price) for button, price in zip(buttons, prices)]
+    other_buttons = buttons[len(changed_buttons):]
+    new_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=keyboard.resize_keyboard,
+                                             one_time_keyboard=keyboard.one_time_keyboard,
+                                             selective=keyboard.selective,
+                                             row_width=keyboard.row_width)
+    new_keyboard.add(*changed_buttons, *other_buttons)
+
+    return new_keyboard

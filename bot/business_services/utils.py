@@ -1,3 +1,4 @@
+import re
 from telebot import types
 
 from vedis import Vedis
@@ -5,7 +6,9 @@ from vedis import Vedis
 from bot.models import TgUser, Contact
 from dustbusters_users_bot.settings import STATES_FILE
 from bot.states import States
-from bot.keyboards import CLEANING_TYPE_KEYBOARD
+from bot.business_services.cleaning import CLEANINGS, Cleaning
+from bot.business_services.enums import CleaningWindows, CleaningWindowsNames, VisitNames, VisitTypes
+
 
 def user_exists(message) -> bool:
     return TgUser.objects.filter(tg_id=message.chat.id).exists()
@@ -68,10 +71,38 @@ def create_obj(model):
     return inner
 
 
-def get_trip_type_from_name(text_type):
-    buttons = get_keyboards_buttons_text(CLEANING_TYPE_KEYBOARD)
-    return buttons.index(text_type)
+def get_cleaning_type_from_name(name: str) -> int:
+    return list(filter(lambda cleaning: cleaning.name == name, CLEANINGS.values()))[0].cleaning_type
+
+
+def get_windows_type_from_name(name: str) -> int:
+    pattern_with_windows = CleaningWindowsNames.WITH_WINDOWS.value\
+        .replace("(", r"\(").replace(")", r"\)").replace("%s", r"(\d+)")
+    pattern_without_windows = CleaningWindowsNames.WITHOUT_WINDOWS.value\
+        .replace("(", r"\(").replace(")", r"\)").replace("%s", r"(\d+)")
+    if re.match(pattern_with_windows, name):
+        return CleaningWindows.WITH_WINDOWS.value
+    elif re.match(pattern_without_windows, name):
+        return CleaningWindows.WITHOUT_WINDOWS.value
+    else:
+        raise ValueError(f"such windows type {name} was not found")
+
+
+def get_visit_type_from_name(name: str) -> int:
+    for visit_name in VisitNames:
+        pattern = visit_name.value.replace("(", r"\(").replace(")", r"\)").replace("%s", r"(\d+)")
+        if re.match(pattern, name):
+            return VisitTypes[visit_name.name].value
+    raise ValueError(f"such visit type {name} was not found")
 
 
 def has_message_text(message):
     return bool(message.text)
+
+
+def get_cleanings_names() -> list:
+    return [cleaning.name for cleaning in CLEANINGS.values()]
+
+
+def get_cleaning_class_from_type(cleaning_type: int) -> Cleaning:
+    return CLEANINGS[cleaning_type]

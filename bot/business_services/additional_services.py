@@ -11,8 +11,11 @@ class AdditionalService:
     def __init__(self, chosen=False):
         self.chosen = chosen
 
+    def get_price(self, service_type: int):
+        return self.prices[service_type]
+
     def build_name(self, service_type: int):
-        return self.name % self.prices[service_type]
+        return self.name % self.get_price(service_type)
 
 
 class AdditionalServiceClass(type):

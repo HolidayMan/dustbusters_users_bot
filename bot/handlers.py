@@ -18,19 +18,6 @@ def handle_back_to_menu(delete=False, model=None):
     return inner
 
 
-# def check_message_text(invalid_phrase, check=None): # TODO: finish this function
-#     def inner(func):
-#         def wrapper(message, *args, **kwargs):
-#             print(func, wrapper)
-#             if not message.text:
-#                 # bot.register_next_step_handler(message, wrapper)
-#                 return bot.send_message(message.chat.id, invalid_phrase, parse_mode="HTML")
-#
-#             return func(message, *args, **kwargs)
-#         return wrapper
-#     return inner
-
-
 @bot.message_handler(func=lambda message: message.text == BACK_TO_MENU_BUTTON.text)
 def back_to_menu_handler(message):
     set_menu_state(message.chat.id)

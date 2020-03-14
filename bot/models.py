@@ -1,8 +1,9 @@
 from django.db import models
 import bot.exeptions as exceptions
-from .keyboards import DAY_TRIP_BUTTON, EVENING_TRIP_BUTTON,  NIGHT_TRIP_BUTTON
-from bot.business_services.prices import CleaningPrices
+# from .keyboards import DAY_VISIT_BUTTON, EVENING_VISIT_BUTTON, NIGHT_VISIT_BUTTON
+from bot.business_services.prices import SoftCleaningPrices
 from .business_services.enums import CleaningTypes, VisitTypes
+# from .business_services.cleaning import Cleaning
 
 
 def cut_phone_number(phone_number):
@@ -51,8 +52,8 @@ class AdditionalService(models.Model):  # TODO: add initial data to fixtures
     name = models.CharField(max_length=256)
 
 
-class CleaningOrder(models.Model):  # TODO: refactor code
-    windows = models.BooleanField(default=False)
+class CleaningOrder(models.Model):
+    windows = models.BooleanField(blank=True, null=True)
     type = models.IntegerField(blank=True, null=True)  # CleaningType
     visit = models.IntegerField(blank=True, null=True)
     place_size = models.IntegerField(blank=True, null=True)
@@ -61,51 +62,18 @@ class CleaningOrder(models.Model):  # TODO: refactor code
     additional_services = models.ManyToManyField("AdditionalService", related_name="cleaning_orders")
     user = models.ForeignKey("TgUser", on_delete=models.CASCADE, related_name="cleaning_orders")
 
-    TYPE_WITHOUT_WINDOWS = 0
-    TYPE_WITH_WINDOWS = 1
-
-    DAY_TRIP = VisitTypes.DAY_VISIT.value
-    EVENING_TRIP = VisitTypes.EVENING_VISIT.value
-    NIGHT_TRIP = VisitTypes.NIGHT_VISIT.value
-
-    @staticmethod
-    def get_trip_type(trip_name):
-        trip_types = {
-            DAY_TRIP_BUTTON.text: 0,
-            EVENING_TRIP_BUTTON.text: 1,
-            NIGHT_TRIP_BUTTON.text: 2
-        }
-        return trip_types[trip_name]
-
-    def get_per_metre_price(self):
-        if self.type == self.TYPE_WITH_WINDOWS:
-            return CleaningPrices.PRICE_WITH_WINDOWS.value
-        else:
-            return CleaningPrices.PRICE_WITHOUT_WINDOWS.value
-
-    def get_trip_price(self):
-        if self.visit == self.DAY_TRIP:
-            return CleaningPrices.PRICE_DAY_TRIP.value
-        elif self.visit == self.EVENING_TRIP:
-            return CleaningPrices.PRICE_EVENING_TRIP.value
-        elif self.visit == self.NIGHT_TRIP:
-            return CleaningPrices.PRICE_NIGHT_TRIP.value
-        else:
-            return 0
-
-    def get_additional_service_price(self):
-        price = 0
-        if self.hard_work:
-            price += CleaningPrices.PRICE_HARD_WORD.value
-        if self.keys_delivery:
-            price += CleaningPrices.PRICE_KEYS_DELIVERY.value
-        if self.very_dirty:
-            price += CleaningPrices.PRICE_VERY_DIRTY.value
-        return price
-
-    def calc_price(self):
-        price = 0
-        price += self.place_size * self.get_per_metre_price()
-        price += self.get_trip_price()
-        price += self.get_additional_service_price()
-        return price
+    @classmethod
+    def new_from_cleaning(cls, cleaning):
+        new_order = cls(type=cleaning.cleaning_type,
+                        user=cleaning.user)
+        if cleaning.visit is not None:
+            new_order.visit = cleaning.visit
+        if cleaning.visit_time:
+            new_order.time = cleaning.visit_time
+        if cleaning.visit_date:
+            new_order.date = cleaning.visit_date
+        if cleaning.windows:
+            new_order.windows = cleaning.windows
+        if cleaning.place_size:
+            new_order.place_size = cleaning.place_size
+        return new_order

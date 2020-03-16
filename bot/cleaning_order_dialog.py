@@ -10,7 +10,7 @@ from bot.handlers import handle_back_to_menu, back_to_menu_handler
 from bot.models import CleaningOrder
 from bot.business_services.utils import (get_keyboards_buttons_text, get_last_db_obj, get_cleaning_type_from_name,
                                          has_message_text, set_state, get_current_state, get_windows_type_from_name,
-                                         get_cleaning_class_from_type, get_visit_type_from_name)
+                                         get_cleaning_class_from_type, get_visit_type_from_name, set_menu_state)
 from .states import States
 from bot.business_services.enums import VisitTypes, CallbacksTexts, VisitNames, CleaningWindowsNames, \
     CleaningWindowsTypes
@@ -125,6 +125,7 @@ def handle_cleaning_date(message):
     cleaning.visit_date = order_date
     cleaning.save()
 
+    time_to_format = None
     if cleaning.visit == VisitTypes.DAY_VISIT.value:
         time_to_format = "12:00"
     elif cleaning.visit == VisitTypes.EVENING_VISIT.value:
@@ -188,7 +189,8 @@ def handle_additional_services_yes(call):
 
 @bot.callback_query_handler(func=lambda call: get_current_state(
     user_id=call.message.chat.id) == States.S_HANDLE_ADDITIONAL_SERVICE.value
-                                              and (call.data == NO_ADDSERVICE_BUTTON.callback_data or call.data == ADDSERVICES_MAKE_ORDER_BUTTON.callback_data))
+                                              and (
+                                                      call.data == NO_ADDSERVICE_BUTTON.callback_data or call.data == ADDSERVICES_MAKE_ORDER_BUTTON.callback_data))
 def handle_additional_services_no(call):
     message = call.message
     bot.delete_message(message.chat.id, message.message_id)
@@ -227,7 +229,7 @@ def order_recieved(message: types.Message):
     cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
 
     additional_services = "\n".join(f"    {ind}) {service.name}"
-                                       for ind, service in enumerate(cleaning.additional_services, start=1))
+                                    for ind, service in enumerate(cleaning.additional_services, start=1))
 
     visit = None
     for visit_type in VisitTypes:
@@ -241,7 +243,7 @@ def order_recieved(message: types.Message):
 
     visit_date = cleaning.visit_date.strftime("%d.%m.%Y")
     visit_time = cleaning.visit_time.strftime("%H:%M")
-
+    set_menu_state(message.chat.id)
     return bot.send_message(message.chat.id, ph.ORDER_RECIEVED % (cleaning.name,
                                                                   cleaning_type,
                                                                   cleaning.place_size,

@@ -15,14 +15,19 @@ class CleaningNames(Enum):
     ABSOLUT_CLEANING = "ABSOLUTНАЯ уборка"
 
 
-class CleaningWindows(Enum):
+class CleaningWindowsTypes(Enum):
     WITH_WINDOWS = True
     WITHOUT_WINDOWS = False
 
 
-class CleaningWindowsNames(Enum):
+class CleaningWindowsPriceNames(Enum):
     WITH_WINDOWS = "Уборка квартиры с помывкой окон (%s руб/м²)"
     WITHOUT_WINDOWS = "Уборка квартиры без помывки окон (%s руб/м²)"
+
+
+class CleaningWindowsNames(Enum):
+    WITH_WINDOWS = "Уборка квартиры с помывкой окон"
+    WITHOUT_WINDOWS = "Уборка квартиры без помывки окон"
 
 
 class VisitTypes(Enum):
@@ -31,10 +36,16 @@ class VisitTypes(Enum):
     NIGHT_VISIT = 2
 
 
-class VisitNames(Enum):
+class VisitPriceNames(Enum):
     DAY_VISIT = "Дневной выезд 9:00 — 15:00 (%s ₽)"
     EVENING_VISIT = "Вечерний выезд 16:00 — 21:00 (%s ₽)"
     NIGHT_VISIT = "Ночной выезд 22:00 — 8:00 (%s ₽)"
+
+
+class VisitNames(Enum):
+    DAY_VISIT = "Дневной выезд 9:00 — 15:00"
+    EVENING_VISIT = "Вечерний выезд 16:00 — 21:00"
+    NIGHT_VISIT = "Ночной выезд 22:00 — 8:00"
 
 
 class CallbacksTexts(Enum):

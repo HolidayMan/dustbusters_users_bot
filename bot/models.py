@@ -46,6 +46,7 @@ class TgUser(models.Model):
 
 
 class AdditionalService(models.Model):
+    service_name = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
 
 

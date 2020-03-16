@@ -22,3 +22,5 @@ def handle_back_to_menu(delete=False, model=None):
 def back_to_menu_handler(message):
     set_menu_state(message.chat.id)
     return bot.send_message(message.chat.id, ph.MENU, reply_markup=MENU_KEYBOARD)
+
+

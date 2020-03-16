@@ -12,7 +12,8 @@ from bot.business_services.utils import (get_keyboards_buttons_text, get_last_db
                                          has_message_text, set_state, get_current_state, get_windows_type_from_name,
                                          get_cleaning_class_from_type, get_visit_type_from_name)
 from .states import States
-from bot.business_services.enums import VisitTypes, CallbacksTexts
+from bot.business_services.enums import VisitTypes, CallbacksTexts, VisitNames, CleaningWindowsNames, \
+    CleaningWindowsTypes
 
 
 def get_tomorrow_date() -> datetime:
@@ -203,14 +204,6 @@ def handle_additional_services_cancel(call):
     return back_to_menu_handler(call.message)
 
 
-# @bot.callback_query_handler(func=lambda call: True)
-# def handle_all(call):
-#     print(call.data)
-#     print(call.data.split('.')[0] == CallbacksTexts.CLEANING_ADDITIONAL_SERVICE_CALLBACK.value.split('.')[0])
-#     print(get_current_state(
-#         user_id=call.message.chat.id) == States.S_HANDLE_ADDITIONAL_SERVICE.value)
-
-
 @bot.callback_query_handler(func=lambda call: get_current_state(
     user_id=call.message.chat.id) == States.S_HANDLE_ADDITIONAL_SERVICE.value
                                               and call.data.split('.')[0] ==
@@ -232,4 +225,29 @@ def handle_choose_additional_service(call):
 def order_recieved(message: types.Message):
     order = get_last_db_obj(model=CleaningOrder, user=message.chat)
     cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
-    return bot.send_message(message.chat.id, ph.ORDER_RECIEVED % (cleaning.calc_price()), parse_mode="HTML", reply_markup=MENU_KEYBOARD)
+
+    additional_services = "\n".join(f"    {ind}) {service.name}"
+                                       for ind, service in enumerate(cleaning.additional_services, start=1))
+
+    visit = None
+    for visit_type in VisitTypes:
+        if visit_type.value == cleaning.visit:
+            visit = VisitNames[visit_type.name].value
+
+    cleaning_type = None
+    for windows_type in CleaningWindowsTypes:
+        if windows_type.value == cleaning.cleaning_type:
+            cleaning_type = CleaningWindowsNames[windows_type.name].value
+
+    visit_date = cleaning.visit_date.strftime("%d.%m.%Y")
+    visit_time = cleaning.visit_time.strftime("%H:%M")
+
+    return bot.send_message(message.chat.id, ph.ORDER_RECIEVED % (cleaning.name,
+                                                                  cleaning_type,
+                                                                  cleaning.place_size,
+                                                                  visit,
+                                                                  visit_date,
+                                                                  visit_time,
+                                                                  additional_services,
+                                                                  cleaning.calc_price()),
+                            parse_mode="HTML", reply_markup=MENU_KEYBOARD)

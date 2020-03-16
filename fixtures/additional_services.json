@@ -1,65 +1,82 @@
 [
-   {
-      "model":"bot.additionalservice",
-      "pk":1,
-      "fields":{
-         "name":"CLEANING_COMPLEX_CHANDELIER"
-      }
-   },
-   {
-      "model":"bot.additionalservice",
-      "pk":2,
-      "fields":{
-         "name":"CLEANING_KEYS_DELIVERY"
-      }
-   },
-   {
-      "model":"bot.additionalservice",
-      "pk":3,
-      "fields":{
-         "name":"CLEANING_IRONING"
-      }
-   },
-   {
-      "model":"bot.additionalservice",
-      "pk":4,
-      "fields":{
-         "name":"CLEANING_ADDITIONAL_BATHROOM"
-      }
-   },
-   {
-      "model":"bot.additionalservice",
-      "pk":5,
-      "fields":{
-         "name":"CLEANING_BALCONY_CLEANING"
-      }
-   },
-   {
-      "model":"bot.additionalservice",
-      "pk":6,
-      "fields":{
-         "name":"CLEANING_VERY_DIRTY"
-      }
-   },
-   {
-      "model":"bot.additionalservice",
-      "pk":7,
-      "fields":{
-         "name":"CLEANING_EQUIPMENT_DELIVERY_MOSCOW"
-      }
-   },
-   {
-      "model":"bot.additionalservice",
-      "pk":8,
-      "fields":{
-         "name":"CLEANING_EQUIPMENT_DELIVERY_MKAD"
-      }
-   },
-   {
-      "model":"bot.additionalservice",
-      "pk":9,
-      "fields":{
-         "name":"CLEANING_ECO_CLEANING"
-      }
-   }
+  {
+    "model": "bot.additionalservice",
+    "pk": 1,
+    "fields": {
+      "service_name": "CLEANING_COMPLEX_CHANDELIER",
+      "name": "Сложная разборная \\ хрустальная люстра"
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 2,
+    "fields": {
+      "service_name": "CLEANING_KEYS_DELIVERY",
+      "name": "Доставить ключи "
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 3,
+    "fields": {
+      "service_name": "KEYS_TAKING",
+      "name": "Забрать ключи"
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 4,
+    "fields": {
+      "service_name": "CLEANING_IRONING",
+      "name": "Глажка белья"
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 5,
+    "fields": {
+      "service_name": "CLEANING_ADDITIONAL_BATHROOM",
+      "name": "Дополнительный с/у"
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 6,
+    "fields": {
+      "service_name": "CLEANING_BALCONY_CLEANING",
+      "name": "Уборка на балконе"
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 7,
+    "fields": {
+      "service_name": "CLEANING_VERY_DIRTY",
+      "name": "Высокая степень загрязнения"
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 8,
+    "fields": {
+      "service_name": "CLEANING_EQUIPMENT_DELIVERY_MOSCOW",
+      "name": "Доставка оборудования по Москве"
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 9,
+    "fields": {
+      "service_name": "CLEANING_EQUIPMENT_DELIVERY_MKAD",
+      "name": "Доставка оборудования за МКАД"
+    }
+  },
+  {
+    "model": "bot.additionalservice",
+    "pk": 10,
+    "fields": {
+      "service_name": "CLEANING_ECO_CLEANING",
+      "name": "Эко-уборка"
+    }
+  }
 ]

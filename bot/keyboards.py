@@ -3,21 +3,21 @@ from typing import Tuple
 
 
 from bot.business_services.utils import get_cleanings_names
-from bot.business_services.enums import VisitNames, CleaningWindowsNames, CallbacksTexts
+from bot.business_services.enums import VisitPriceNames, CleaningWindowsPriceNames, CallbacksTexts
 from bot.business_services.cleaning import Cleaning
 from bot import phrases as ph
 
 AUTHORIZE_BUTTON = types.KeyboardButton("Авторизоваться", request_contact=True)
 MAKE_CLEANING_ORDER_BUTTON = types.KeyboardButton("Заказать уборку")
 
-WITHOUT_WINDOWS_BUTTON = types.KeyboardButton(CleaningWindowsNames.WITHOUT_WINDOWS.value)
-WITH_WINDOWS_BUTTON = types.KeyboardButton(CleaningWindowsNames.WITH_WINDOWS.value)
+WITHOUT_WINDOWS_BUTTON = types.KeyboardButton(CleaningWindowsPriceNames.WITHOUT_WINDOWS.value)
+WITH_WINDOWS_BUTTON = types.KeyboardButton(CleaningWindowsPriceNames.WITH_WINDOWS.value)
 
 SOFT_CLEANING_BUTTON = types.KeyboardButton("Уборка квартиры без помывки окон (%s руб/м²)")
 
-DAY_VISIT_BUTTON = types.KeyboardButton(VisitNames.DAY_VISIT.value)
-EVENING_VISIT_BUTTON = types.KeyboardButton(VisitNames.EVENING_VISIT.value)
-NIGHT_VISIT_BUTTON = types.KeyboardButton(VisitNames.NIGHT_VISIT.value)
+DAY_VISIT_BUTTON = types.KeyboardButton(VisitPriceNames.DAY_VISIT.value)
+EVENING_VISIT_BUTTON = types.KeyboardButton(VisitPriceNames.EVENING_VISIT.value)
+NIGHT_VISIT_BUTTON = types.KeyboardButton(VisitPriceNames.NIGHT_VISIT.value)
 
 YES_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Да✅", callback_data=CallbacksTexts.ADDITIONAL_SERVICE_ACCEPTED.value)
 NO_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Нет🚫", callback_data=CallbacksTexts.ADDITIONAL_SERVICE_DECLINED.value)
@@ -70,7 +70,7 @@ def build_cleaning_addservices_message_and_keyboard(cleaning: Cleaning) -> Tuple
     message += "\n\n"
 
     for index, service in enumerate(cleaning.additional_services, start=1):
-        message += f"<b>{index}. {service.build_name()}</b> \n"
+        message += f"<b>{index}. {service.build_name()}</b> {'✅' if service.chosen else ''}\n"
 
     message += "\n"
     message += ph.SHOW_PRICE % cleaning.calc_price()

@@ -70,7 +70,8 @@ class Cleaning(metaclass=HelloMeta):
         place_size: int = instance.place_size
         visit_date: date = instance.date
         visit_time: time = instance.time
-        additional_services_names = [service.name for service in instance.additional_services.all()]
+
+        additional_services_names = [service.service_name for service in instance.additional_services.all()]
         additional_services = [
             service(cls.cleaning_type, True) if service.clsname in additional_services_names else service(
                 cls.cleaning_type)
@@ -134,7 +135,7 @@ class CleaningDB:
             self.instance.place_size = self.cleaning.place_size
         if any(service.chosen for service in self.cleaning.additional_services):
             for service in self.cleaning.additional_services:
-                if self.instance.additional_services.filter(name=service.clsname).exists() and not service.chosen:
+                if self.instance.additional_services.filter(service_name=service.clsname).exists() and not service.chosen:
                     self.instance.additional_services.remove(service.to_model())
                 if service.chosen:
                     self.instance.additional_services.add(service.to_model())

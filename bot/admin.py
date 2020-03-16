@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import *
 from bot.business_services.utils import get_cleaning_class_from_type
-from bot.business_services.enums import CleaningWindows, CleaningNames, CleaningTypes, VisitTypes
+from bot.business_services.enums import CleaningNames, CleaningTypes, VisitTypes
 
 
 @admin.register(Contact)
@@ -20,7 +20,7 @@ class CleaningOrderAdmin(admin.ModelAdmin):
                     "display_additional_service", "display_price")  # "additional_service", "hard_work", "keys_delivery", "very_dirty",
 
     def display_additional_service(self, obj: CleaningOrder):
-        return " ,".join(obj.additional_services.all()) if obj.additional_services.all() else "Не выбрано"
+        return ", ".join(service.name for service in obj.additional_services.all()) if obj.additional_services.all() else "Не выбрано"
 
     def display_type(self, obj: CleaningOrder):
         if obj.type == CleaningTypes.SOFT_CLEANING.value:
@@ -61,3 +61,8 @@ class CleaningOrderAdmin(admin.ModelAdmin):
     display_trip.short_description = "Trip time"
     display_additional_service.short_description = "Additional services"
     display_price.short_description = "Total rice"
+
+
+@admin.register(AdditionalService)
+class AdditionalSeviceAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")

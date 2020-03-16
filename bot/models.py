@@ -45,7 +45,7 @@ class TgUser(models.Model):
             return str(self.id)
 
 
-class AdditionalService(models.Model):  # TODO: add initial data to fixtures
+class AdditionalService(models.Model):
     name = models.CharField(max_length=256)
 
 

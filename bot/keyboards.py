@@ -1,6 +1,11 @@
 from telebot import types
+from typing import Tuple
+
+
 from bot.business_services.utils import get_cleanings_names
-from bot.business_services.enums import VisitNames, CleaningWindowsNames
+from bot.business_services.enums import VisitNames, CleaningWindowsNames, CallbacksTexts
+from bot.business_services.cleaning import Cleaning
+from bot import phrases as ph
 
 AUTHORIZE_BUTTON = types.KeyboardButton("Авторизоваться", request_contact=True)
 MAKE_CLEANING_ORDER_BUTTON = types.KeyboardButton("Заказать уборку")
@@ -14,9 +19,10 @@ DAY_VISIT_BUTTON = types.KeyboardButton(VisitNames.DAY_VISIT.value)
 EVENING_VISIT_BUTTON = types.KeyboardButton(VisitNames.EVENING_VISIT.value)
 NIGHT_VISIT_BUTTON = types.KeyboardButton(VisitNames.NIGHT_VISIT.value)
 
-YES_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Да✅", callback_data="additional_service_accepted")
-NO_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Нет🚫", callback_data="additional_service_declined")
-ADDSERVICE_BACK_TO_MENU_BUTTON = types.InlineKeyboardButton("❌", callback_data="cleaning_cancel")
+YES_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Да✅", callback_data=CallbacksTexts.ADDITIONAL_SERVICE_ACCEPTED.value)
+NO_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Нет🚫", callback_data=CallbacksTexts.ADDITIONAL_SERVICE_DECLINED.value)
+ADDSERVICE_BACK_TO_MENU_BUTTON = types.InlineKeyboardButton("❌", callback_data=CallbacksTexts.CLEANING_CANCEL.value)
+ADDSERVICES_MAKE_ORDER_BUTTON = types.InlineKeyboardButton("Заказать", callback_data=CallbacksTexts.ADDITIONAL_SERVICE_CHOSED.value)
 
 BACK_TO_MENU_BUTTON = types.KeyboardButton("Назад")
 deleteKeyboard = types.ReplyKeyboardRemove()
@@ -56,3 +62,31 @@ def build_keyboard_with_prices(keyboard, prices):
     new_keyboard.add(*changed_buttons, *other_buttons)
 
     return new_keyboard
+
+
+def build_cleaning_addservices_message_and_keyboard(cleaning: Cleaning) -> Tuple[str, types.InlineKeyboardMarkup]:
+    message = ""
+    message += ph.CHOOSE_WINDOWS
+    message += "\n\n"
+
+    for index, service in enumerate(cleaning.additional_services, start=1):
+        message += f"<b>{index}. {service.build_name()}</b> \n"
+
+    message += "\n"
+    message += ph.SHOW_PRICE % cleaning.calc_price()
+
+    keyboard = types.InlineKeyboardMarkup(row_width=5)
+    buttons = []
+    for index, service in enumerate(cleaning.additional_services):
+        if service.chosen:
+            button_text = f"{index+1}✅"
+        else:
+            button_text = str(index+1)
+        button_callback = CallbacksTexts.CLEANING_ADDITIONAL_SERVICE_CALLBACK.value % index
+        button = types.InlineKeyboardButton(button_text, callback_data=button_callback)
+        buttons.append(button)
+
+    keyboard.add(*buttons)
+    keyboard.row(ADDSERVICES_MAKE_ORDER_BUTTON, ADDSERVICE_BACK_TO_MENU_BUTTON)
+
+    return message, keyboard

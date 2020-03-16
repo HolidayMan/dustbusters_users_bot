@@ -1,5 +1,6 @@
 from enum import Enum
 
+from bot.models import AdditionalService as AdditionalServiceModel
 from .enums import CleaningTypes
 
 
@@ -8,14 +9,26 @@ class AdditionalService:
     name: str = None
     chosen: bool = False
 
-    def __init__(self, chosen=False):
+    def __init__(self, service_type: int, chosen: bool = False):
+        self.service_type = service_type
         self.chosen = chosen
 
     def get_price(self, service_type: int):
         return self.prices[service_type]
 
-    def build_name(self, service_type: int):
-        return self.name % self.get_price(service_type)
+    def build_name(self):
+        return self.name % self.get_price(self.service_type)
+
+    @staticmethod
+    def from_instance(instance):
+        name = instance.name
+        for service in CleaningAdditionalServices:
+            if service.value.name == name:
+                return service()
+        raise ValueError("no such additional service exists")
+
+    def to_model(self):
+        return AdditionalServiceModel.objects.get(name=self.clsname)
 
 
 class AdditionalServiceClass(type):
@@ -25,7 +38,7 @@ class AdditionalServiceClass(type):
         return new_additional_service
 
     def __init__(cls, clsname, name, prices):
-        cls.clsname = name
+        cls.clsname = clsname
         cls.name = name
         cls.prices = prices
 
@@ -33,7 +46,7 @@ class AdditionalServiceClass(type):
 class CleaningAdditionalServices(Enum):
     COMPLEX_CHANDELIER = AdditionalServiceClass(
         "CLEANING_COMPLEX_CHANDELIER",
-        "Сложная разборная \\ хрустальная люстра от %s",
+        "Сложная разборная \\ хрустальная люстра: от %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 1000,
             CleaningTypes.CAPITAL_CLEANING.value: 1000,
@@ -43,7 +56,7 @@ class CleaningAdditionalServices(Enum):
 
     KEYS_DELIVERY = AdditionalServiceClass(
         "CLEANING_KEYS_DELIVERY",
-        "Доставка ключей %s",
+        "Доставка ключей: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 500,
             CleaningTypes.CAPITAL_CLEANING.value: 500,
@@ -53,7 +66,7 @@ class CleaningAdditionalServices(Enum):
 
     IRONING = AdditionalServiceClass(
         "CLEANING_IRONING",
-        "Глажка белья %s",
+        "Глажка белья: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 500,
             CleaningTypes.CAPITAL_CLEANING.value: 500,
@@ -63,7 +76,7 @@ class CleaningAdditionalServices(Enum):
 
     ADDITIONAL_BATHROOM = AdditionalServiceClass(
         "CLEANING_ADDITIONAL_BATHROOM",
-        "Дополнительный с/у %s",
+        "Дополнительный с/у: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 500,
             CleaningTypes.CAPITAL_CLEANING.value: 500,
@@ -73,7 +86,7 @@ class CleaningAdditionalServices(Enum):
 
     BALCONY_CLEANING = AdditionalServiceClass(
         "CLEANING_BALCONY_CLEANING",
-        "Уборка на балконе %s",
+        "Уборка на балконе: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 500,
             CleaningTypes.CAPITAL_CLEANING.value: 500,
@@ -83,7 +96,7 @@ class CleaningAdditionalServices(Enum):
 
     VERY_DIRTY = AdditionalServiceClass(
         "CLEANING_VERY_DIRTY",
-        "Высокая степень загрязнения от %s",
+        "Высокая степень загрязнения от: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 1000,
             CleaningTypes.CAPITAL_CLEANING.value: 1000,
@@ -93,7 +106,7 @@ class CleaningAdditionalServices(Enum):
 
     EQUIPMENT_DELIVERY_MOSCOW = AdditionalServiceClass(
         "CLEANING_EQUIPMENT_DELIVERY_MOSCOW",
-        "Доставка оборудования по Москве %s",
+        "Доставка оборудования по Москве: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 1000,
             CleaningTypes.CAPITAL_CLEANING.value: 1000,
@@ -103,7 +116,7 @@ class CleaningAdditionalServices(Enum):
 
     EQUIPMENT_DELIVERY_MKAD = AdditionalServiceClass(
         "CLEANING_EQUIPMENT_DELIVERY_MKAD",
-        "Доставка оборудования за МКАД от %s",
+        "Доставка оборудования за МКАД от: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 1500,
             CleaningTypes.CAPITAL_CLEANING.value: 1500,
@@ -113,7 +126,7 @@ class CleaningAdditionalServices(Enum):
 
     ECO_CLEANING = AdditionalServiceClass(
         "CLEANING_ECO_CLEANING",
-        "Эко-уборка от %s",
+        "Эко-уборка от: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 1080,
             CleaningTypes.CAPITAL_CLEANING.value: 1800,

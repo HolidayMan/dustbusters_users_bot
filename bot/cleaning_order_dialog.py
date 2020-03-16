@@ -1,6 +1,8 @@
 import re
 from datetime import datetime, timedelta, time
 
+from telebot import types
+
 from bot.bot import bot
 from bot.keyboards import *
 import bot.phrases as ph
@@ -10,7 +12,7 @@ from bot.business_services.utils import (get_keyboards_buttons_text, get_last_db
                                          has_message_text, set_state, get_current_state, get_windows_type_from_name,
                                          get_cleaning_class_from_type, get_visit_type_from_name)
 from .states import States
-from bot.business_services.enums import VisitTypes
+from bot.business_services.enums import VisitTypes, CallbacksTexts
 
 
 def get_tomorrow_date() -> datetime:
@@ -18,7 +20,6 @@ def get_tomorrow_date() -> datetime:
     return datetime.utcnow() + one_day
 
 
-# @check_message_text(ph.INVALID_CLEANING_TYPE, check=lambda t: t in get_keyboards_buttons_text(CLEANING_TYPE_KEYBOARD))
 @handle_back_to_menu(delete=True, model=CleaningOrder)
 def handle_cleaning_type(message):
     if message.text not in get_keyboards_buttons_text(CLEANING_TYPE_KEYBOARD) or not has_message_text(message):
@@ -164,27 +165,37 @@ def handle_cleaning_time(message):
     cleaning.visit_time = order_time
     cleaning.save()
 
-    set_state(message.chat.id, States.S_HANDLE_ADDITIONAL_SERVICE)
+    set_state(message.chat.id, States.S_HANDLE_ADDITIONAL_SERVICE.value)
     return (bot.send_message(message.chat.id, ph.SHOW_PRICE % cleaning.calc_price(), parse_mode="HTML",
                              reply_markup=deleteKeyboard),
-            bot.send_message(message.chat.id, ph.CHOOSE_ADDITIONAL_SERVICE,
+            bot.send_message(message.chat.id, ph.DO_YOU_NEED_ADDITIONAL_SERVICES,
                              parse_mode="HTML", reply_markup=ADDSERVICE_KEYBOARD))
 
 
 @bot.callback_query_handler(func=lambda call: get_current_state(
-    user_id=call.message.chat.id) and call.data == YES_ADDSERVICE_BUTTON.callback_data)
+    user_id=call.message.chat.id) == States.S_HANDLE_ADDITIONAL_SERVICE.value
+                                              and call.data == YES_ADDSERVICE_BUTTON.callback_data)
 def handle_additional_services_yes(call):
-    pass
+    message = call.message
+    order = get_last_db_obj(model=CleaningOrder, user=message.chat)
+    cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
+    message_text, keyboard = build_cleaning_addservices_message_and_keyboard(cleaning)
+
+    return bot.edit_message_text(message_text, message.chat.id, message.message_id, parse_mode="HTML",
+                                 reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: get_current_state(
-    user_id=call.message.chat.id) and call.data == NO_ADDSERVICE_BUTTON.callback_data)
+    user_id=call.message.chat.id) == States.S_HANDLE_ADDITIONAL_SERVICE.value
+                                              and (call.data == NO_ADDSERVICE_BUTTON.callback_data or call.data == ADDSERVICES_MAKE_ORDER_BUTTON.callback_data))
 def handle_additional_services_no(call):
-    pass
+    message = call.message
+    bot.delete_message(message.chat.id, message.message_id)
+    return order_recieved(message)
 
 
 @bot.callback_query_handler(func=lambda call: get_current_state(
-    user_id=call.message.chat.id) and call.data == ADDSERVICE_BACK_TO_MENU_BUTTON.callback_data)
+    user_id=call.message.chat.id) == States.S_HANDLE_ADDITIONAL_SERVICE.value and call.data == ADDSERVICE_BACK_TO_MENU_BUTTON.callback_data)
 def handle_additional_services_cancel(call):
     order = get_last_db_obj(model=CleaningOrder, user=call.message.chat)
     order.delete()
@@ -192,7 +203,33 @@ def handle_additional_services_cancel(call):
     return back_to_menu_handler(call.message)
 
 
-@bot.callback_query_handler(func=lambda call: True)
-@handle_back_to_menu
-def handle_need_additional_service(message):
-    pass
+# @bot.callback_query_handler(func=lambda call: True)
+# def handle_all(call):
+#     print(call.data)
+#     print(call.data.split('.')[0] == CallbacksTexts.CLEANING_ADDITIONAL_SERVICE_CALLBACK.value.split('.')[0])
+#     print(get_current_state(
+#         user_id=call.message.chat.id) == States.S_HANDLE_ADDITIONAL_SERVICE.value)
+
+
+@bot.callback_query_handler(func=lambda call: get_current_state(
+    user_id=call.message.chat.id) == States.S_HANDLE_ADDITIONAL_SERVICE.value
+                                              and call.data.split('.')[0] ==
+                                              CallbacksTexts.CLEANING_ADDITIONAL_SERVICE_CALLBACK.value.split('.')[0])
+def handle_choose_additional_service(call):
+    message = call.message
+    order = get_last_db_obj(model=CleaningOrder, user=message.chat)
+    cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
+
+    index = int(call.data.split('.')[1])
+    cleaning.additional_services[index].chosen = not cleaning.additional_services[index].chosen
+    cleaning.save()
+
+    message_text, keyboard = build_cleaning_addservices_message_and_keyboard(cleaning)
+    return bot.edit_message_text(message_text, message.chat.id, message.message_id, parse_mode="HTML",
+                                 reply_markup=keyboard)
+
+
+def order_recieved(message: types.Message):
+    order = get_last_db_obj(model=CleaningOrder, user=message.chat)
+    cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
+    return bot.send_message(message.chat.id, ph.ORDER_RECIEVED % (cleaning.calc_price()), parse_mode="HTML", reply_markup=MENU_KEYBOARD)

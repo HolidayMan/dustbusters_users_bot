@@ -1,10 +1,10 @@
 from datetime import date, time
-from typing import Union
+from typing import Union, List
 
 from django.db.models.base import ModelBase
 
 from bot.models import CleaningOrder, TgUser
-from .additional_services import CleaningAdditionalServices
+from .additional_services import CleaningAdditionalServices, AdditionalService
 from .enums import CleaningTypes, VisitTypes, CleaningNames
 from .prices import SoftCleaningPrices, CapitalCleaningPrices, ThoroughCleaningPrices, AbsolutCleaningPrices
 
@@ -36,12 +36,13 @@ class Cleaning(metaclass=HelloMeta):
     visit_date: date = None
     visit_time: time = None
     user: TgUser = None
-    additional_services: list = None
+    additional_services: List[AdditionalService] = None
     place_size: int = None
     model: ModelBase = CleaningOrder
     instance: CleaningOrder = None
 
-    def __init__(self, user: Union[TgUser, int], windows: bool, visit: int, place_size: int, additional_services: list = None,
+    def __init__(self, user: Union[TgUser, int], windows: bool, visit: int, place_size: int,
+                 additional_services: List[AdditionalService] = None,
                  visit_date: date = None, visit_time: time = None, instance: CleaningOrder = None):
         if isinstance(user, TgUser):
             self.user = user
@@ -54,7 +55,8 @@ class Cleaning(metaclass=HelloMeta):
         self.visit_time = visit_time
 
         if not additional_services:
-            self.additional_services = [service() for service in CleaningAdditionalServices.getobjects()]
+            self.additional_services = [service(self.cleaning_type) for service in
+                                        CleaningAdditionalServices.getobjects()]
         else:
             self.additional_services = additional_services
 
@@ -69,9 +71,12 @@ class Cleaning(metaclass=HelloMeta):
         visit_date: date = instance.date
         visit_time: time = instance.time
         additional_services_names = [service.name for service in instance.additional_services.all()]
-        additional_services = [service(True) if service.clsname in additional_services_names else service()
-                               for service in CleaningAdditionalServices.getobjects()]
-        return cls(user=user, windows=windows, visit=visit, place_size=place_size, additional_services=additional_services,
+        additional_services = [
+            service(cls.cleaning_type, True) if service.clsname in additional_services_names else service(
+                cls.cleaning_type)
+            for service in CleaningAdditionalServices.getobjects()]
+        return cls(user=user, windows=windows, visit=visit, place_size=place_size,
+                   additional_services=additional_services,
                    visit_date=visit_date, visit_time=visit_time, instance=instance)
 
     def calc_price_for_additional_services(self):
@@ -114,7 +119,7 @@ class CleaningDB:
         else:
             self.instance = cleaning.instance
 
-    def save(self):  # TODO: add additional services saving
+    def save(self):
         self.instance.type = self.cleaning.cleaning_type
 
         if self.cleaning.visit is not None:
@@ -127,6 +132,13 @@ class CleaningDB:
             self.instance.windows = self.cleaning.windows
         if self.cleaning.place_size:
             self.instance.place_size = self.cleaning.place_size
+        if any(service.chosen for service in self.cleaning.additional_services):
+            for service in self.cleaning.additional_services:
+                if self.instance.additional_services.filter(name=service.clsname).exists() and not service.chosen:
+                    self.instance.additional_services.remove(service.to_model())
+                if service.chosen:
+                    self.instance.additional_services.add(service.to_model())
+
         self.instance.save()
 
 

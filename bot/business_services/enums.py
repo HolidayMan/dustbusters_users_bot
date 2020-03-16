@@ -35,3 +35,11 @@ class VisitNames(Enum):
     DAY_VISIT = "Дневной выезд 9:00 — 15:00 (%s ₽)"
     EVENING_VISIT = "Вечерний выезд 16:00 — 21:00 (%s ₽)"
     NIGHT_VISIT = "Ночной выезд 22:00 — 8:00 (%s ₽)"
+
+
+class CallbacksTexts(Enum):
+    CLEANING_ADDITIONAL_SERVICE_CALLBACK = "cleaning_additional_service.%d"
+    ADDITIONAL_SERVICE_ACCEPTED = "additional_service_accepted"
+    ADDITIONAL_SERVICE_DECLINED = "additional_service_declined"
+    CLEANING_CANCEL = "cleaning_cancel"
+    ADDITIONAL_SERVICE_CHOSED = "additional_service_chosed"

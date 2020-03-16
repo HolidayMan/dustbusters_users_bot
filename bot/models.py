@@ -1,9 +1,6 @@
 from django.db import models
+
 import bot.exeptions as exceptions
-# from .keyboards import DAY_VISIT_BUTTON, EVENING_VISIT_BUTTON, NIGHT_VISIT_BUTTON
-from bot.business_services.prices import SoftCleaningPrices
-from .business_services.enums import CleaningTypes, VisitTypes
-# from .business_services.cleaning import Cleaning
 
 
 def cut_phone_number(phone_number):

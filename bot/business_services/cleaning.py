@@ -8,7 +8,6 @@ from .additional_services import CleaningAdditionalServices, AdditionalService
 from .enums import CleaningTypes, VisitTypes, CleaningNames, CleaningWindowsTypes, CleaningWindowsNames, VisitNames
 from .prices import SoftCleaningPrices, CapitalCleaningPrices, ThoroughCleaningPrices, AbsolutCleaningPrices
 from .amo_objects import save_lead_with_contact, Lead
-from .amo_objects import Contact as AmoContact
 
 CLEANINGS = {}
 
@@ -57,7 +56,7 @@ class Cleaning(metaclass=HelloMeta):
         self.visit_time = visit_time
 
         if not additional_services:
-            self.additional_services = [service(self.cleaning_type) for service in
+            self.additional_services = [service(self) for service in
                                         CleaningAdditionalServices.getobjects()]
         else:
             self.additional_services = additional_services
@@ -73,17 +72,28 @@ class Cleaning(metaclass=HelloMeta):
         visit_date: date = instance.date
         visit_time: time = instance.time
 
+        new_object = cls(user=user, windows=windows, visit=visit, place_size=place_size,
+                         visit_date=visit_date, visit_time=visit_time, instance=instance)
         additional_services_names = [service.service_name for service in instance.additional_services.all()]
         additional_services = [
-            service(cls.cleaning_type, True) if service.clsname in additional_services_names else service(
-                cls.cleaning_type)
+            service(new_object, True) if service.clsname in additional_services_names else service(
+                new_object)
             for service in CleaningAdditionalServices.getobjects()]
-        return cls(user=user, windows=windows, visit=visit, place_size=place_size,
-                   additional_services=additional_services,
-                   visit_date=visit_date, visit_time=visit_time, instance=instance)
+        if not additional_services:
+            additional_services = []
+        new_object.additional_services = additional_services
+        return new_object
 
-    def calc_price_for_additional_services(self):
-        return sum(service.get_price(self.cleaning_type) for service in self.additional_services if service.chosen)
+    def calc_price_for_additional_services(self, total):
+        price = 0
+        for service in self.additional_services:
+            if service.clsname == CleaningAdditionalServices.ECO_CLEANING.value.clsname:
+                if service.chosen:
+                    price += service.get_price_without_selfprice(total + price)
+                continue
+            if service.chosen:
+                price += service.get_price(total + price)
+        return price
 
     def get_cleaning_price(self):
         if not self.place_size:
@@ -107,7 +117,7 @@ class Cleaning(metaclass=HelloMeta):
         total = 0
         total += self.get_cleaning_price()
         total += self.get_visit_price()
-        total += self.calc_price_for_additional_services()
+        total += self.calc_price_for_additional_services(total)
         return total
 
     def save(self):
@@ -141,12 +151,12 @@ class CleaningDB:
             self.instance.windows = self.cleaning.windows
         if self.cleaning.place_size:
             self.instance.place_size = self.cleaning.place_size
-        if any(service.chosen for service in self.cleaning.additional_services):
-            for service in self.cleaning.additional_services:
-                if self.instance.additional_services.filter(service_name=service.clsname).exists() and not service.chosen:
-                    self.instance.additional_services.remove(service.to_model())
-                if service.chosen:
-                    self.instance.additional_services.add(service.to_model())
+        for service in self.cleaning.additional_services:
+            if self.instance.additional_services.filter(
+                    service_name=service.clsname).exists() and not service.chosen:
+                self.instance.additional_services.remove(service.to_model())
+            if service.chosen:
+                self.instance.additional_services.add(service.to_model())
 
         self.instance.save()
 
@@ -160,7 +170,7 @@ class AmoWorker:
 
     def get_cleaning_type(self) -> str:
         for windows_type in CleaningWindowsTypes:
-            if int(windows_type.value) == self.cleaning.cleaning_type:
+            if int(windows_type.value) == self.cleaning.windows:
                 return CleaningWindowsNames[windows_type.name].value
 
     def get_visit(self):

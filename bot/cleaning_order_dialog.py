@@ -193,7 +193,9 @@ def handle_additional_services_yes(call):
                                                       call.data == NO_ADDSERVICE_BUTTON.callback_data or call.data == ADDSERVICES_MAKE_ORDER_BUTTON.callback_data))
 def handle_additional_services_no(call):
     message = call.message
-    bot.delete_message(message.chat.id, message.message_id)
+    order = get_last_db_obj(model=CleaningOrder, user=message.chat)
+    cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
+    bot.edit_message_text(ph.SHOW_PRICE % cleaning.calc_price(), message.chat.id, message.message_id, parse_mode="HTML")
     return order_recieved(message)
 
 
@@ -238,7 +240,7 @@ def order_recieved(message: types.Message):
             visit = VisitNames[visit_type.name].value
 
     for windows_type in CleaningWindowsTypes:
-        if int(windows_type.value) == cleaning.cleaning_type:
+        if windows_type.value == cleaning.windows:
             cleaning_type = CleaningWindowsNames[windows_type.name].value
 
     visit_date = cleaning.visit_date.strftime("%d.%m.%Y")

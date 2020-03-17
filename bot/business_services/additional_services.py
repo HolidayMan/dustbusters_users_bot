@@ -59,7 +59,7 @@ class CleaningAdditionalServices(Enum):
 
     KEYS_DELIVERY = AdditionalServiceClass(
         "CLEANING_KEYS_DELIVERY",
-        "Доставить ключи ",
+        "Доставить ключи",
         "Доставить ключи: %s",
         {
             CleaningTypes.SOFT_CLEANING.value: 500,

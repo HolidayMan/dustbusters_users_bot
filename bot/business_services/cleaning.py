@@ -5,8 +5,10 @@ from django.db.models.base import ModelBase
 
 from bot.models import CleaningOrder, TgUser
 from .additional_services import CleaningAdditionalServices, AdditionalService
-from .enums import CleaningTypes, VisitTypes, CleaningNames
+from .enums import CleaningTypes, VisitTypes, CleaningNames, CleaningWindowsTypes, CleaningWindowsNames, VisitNames
 from .prices import SoftCleaningPrices, CapitalCleaningPrices, ThoroughCleaningPrices, AbsolutCleaningPrices
+from .amo_objects import save_lead_with_contact, Lead
+from .amo_objects import Contact as AmoContact
 
 CLEANINGS = {}
 
@@ -84,6 +86,8 @@ class Cleaning(metaclass=HelloMeta):
         return sum(service.get_price(self.cleaning_type) for service in self.additional_services if service.chosen)
 
     def get_cleaning_price(self):
+        if not self.place_size:
+            return 0
         if self.windows:
             return self.place_size * self.price_with_windows
         else:
@@ -109,6 +113,10 @@ class Cleaning(metaclass=HelloMeta):
     def save(self):
         cleaning_db: CleaningDB = CleaningDB(self)
         cleaning_db.save()
+
+    def save_to_amocrm(self):
+        amosaver = AmoWorker(self)
+        return amosaver.send()
 
 
 class CleaningDB:
@@ -141,6 +149,57 @@ class CleaningDB:
                     self.instance.additional_services.add(service.to_model())
 
         self.instance.save()
+
+
+class AmoWorker:
+    def __init__(self, cleaning):
+        self.cleaning = cleaning
+
+    def get_name(self) -> str:
+        return f"Заявка с бота №{self.cleaning.instance.id}"
+
+    def get_cleaning_type(self) -> str:
+        for windows_type in CleaningWindowsTypes:
+            if int(windows_type.value) == self.cleaning.cleaning_type:
+                return CleaningWindowsNames[windows_type.name].value
+
+    def get_visit(self):
+        for visit_type in VisitTypes:
+            if int(visit_type.value) == self.cleaning.visit:
+                return VisitNames[visit_type.name].value
+
+    def get_visit_datetime(self) -> str:
+        return self.cleaning.visit_date.strftime("%Y-%m-%d ") + self.cleaning.visit_time.strftime("%H:%M:00")
+
+    def get_additional_services(self):
+        return [service.name for service in self.cleaning.additional_services if service.chosen]
+
+    def send(self) -> Lead:
+        if self.get_additional_services():
+            new_lead = Lead(
+                name=self.get_name(),
+                status="Первичный контакт",
+                cleaning_type=self.cleaning.name,
+                windows=self.get_cleaning_type(),
+                place_size=self.cleaning.place_size,
+                visit=self.get_visit(),
+                visit_date_and_time=self.get_visit_datetime(),
+                additional_services=self.get_additional_services(),
+                price=str(self.cleaning.calc_price())
+            )
+        else:
+            new_lead = Lead(
+                name=self.get_name(),
+                status="Первичный контакт",
+                cleaning_type=self.cleaning.name,
+                windows=self.get_cleaning_type(),
+                place_size=self.cleaning.place_size,
+                visit=self.get_visit(),
+                visit_date_and_time=self.get_visit_datetime(),
+                price=str(self.cleaning.calc_price())
+            )
+        save_lead_with_contact(new_lead, self.cleaning.user.contact.amo_id)
+        return new_lead
 
 
 class SoftCleaning(Cleaning):

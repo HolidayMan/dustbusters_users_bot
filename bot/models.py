@@ -11,6 +11,7 @@ class Contact(models.Model):
     phone_number = models.CharField(max_length=16)
     first_name = models.CharField(max_length=64, blank=True, null=True)
     last_name = models.CharField(max_length=64, blank=True, null=True)
+    amo_id = models.IntegerField(blank=True, null=True)
     user = models.OneToOneField("TgUser", on_delete=models.CASCADE, related_name="contact")
 
     @classmethod

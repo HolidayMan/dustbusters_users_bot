@@ -16,3 +16,7 @@ DOMAIN = 'my_domain'
 
 STATES_FILE = os.path.join(BASE_DIR, "states.vdb")
 LOG_FILE = os.path.join(BASE_DIR, "bot.log")
+
+AMO_API_KEY = "api_key"
+AMO_LOGIN = "amo_login"
+AMO_SUBDOMAIN = "amo_subdomain"

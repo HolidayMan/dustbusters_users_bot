@@ -229,20 +229,23 @@ def order_recieved(message: types.Message):
     cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
 
     additional_services = "\n".join(f"    {ind}) {service.name}"
-                                    for ind, service in enumerate(cleaning.additional_services, start=1))
-
+                                    for ind, service in enumerate(cleaning.additional_services, start=1) if service.chosen)
+    if not additional_services:
+        additional_services = "Не выбрано"
     visit = None
     for visit_type in VisitTypes:
         if visit_type.value == cleaning.visit:
             visit = VisitNames[visit_type.name].value
 
-    cleaning_type = None
     for windows_type in CleaningWindowsTypes:
-        if windows_type.value == cleaning.cleaning_type:
+        if int(windows_type.value) == cleaning.cleaning_type:
             cleaning_type = CleaningWindowsNames[windows_type.name].value
 
     visit_date = cleaning.visit_date.strftime("%d.%m.%Y")
     visit_time = cleaning.visit_time.strftime("%H:%M")
+
+    cleaning.save_to_amocrm()
+
     set_menu_state(message.chat.id)
     return bot.send_message(message.chat.id, ph.ORDER_RECIEVED % (cleaning.name,
                                                                   cleaning_type,

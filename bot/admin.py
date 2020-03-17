@@ -6,7 +6,7 @@ from bot.business_services.enums import CleaningNames, CleaningTypes, VisitTypes
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ("user", "phone_number", "first_name", "last_name")
+    list_display = ("user", "phone_number", "first_name", "last_name", "amo_id")
 
 
 @admin.register(TgUser)

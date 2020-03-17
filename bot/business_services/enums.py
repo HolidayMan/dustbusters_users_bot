@@ -21,13 +21,13 @@ class CleaningWindowsTypes(Enum):
 
 
 class CleaningWindowsPriceNames(Enum):
-    WITH_WINDOWS = "Уборка квартиры с помывкой окон (%s руб/м²)"
-    WITHOUT_WINDOWS = "Уборка квартиры без помывки окон (%s руб/м²)"
+    WITH_WINDOWS = "Уборка квартиры с мытьем окон (%s руб/м²)"
+    WITHOUT_WINDOWS = "Уборка квартиры без мытья окон (%s руб/м²)"
 
 
 class CleaningWindowsNames(Enum):
-    WITH_WINDOWS = "Уборка квартиры с помывкой окон"
-    WITHOUT_WINDOWS = "Уборка квартиры без помывки окон"
+    WITH_WINDOWS = "Уборка квартиры с мытьем окон"
+    WITHOUT_WINDOWS = "Уборка квартиры без мытья окон"
 
 
 class VisitTypes(Enum):

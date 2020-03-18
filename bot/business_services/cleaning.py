@@ -75,12 +75,19 @@ class Cleaning(metaclass=HelloMeta):
         new_object = cls(user=user, windows=windows, visit=visit, place_size=place_size,
                          visit_date=visit_date, visit_time=visit_time, instance=instance)
         additional_services_names = [service.service_name for service in instance.additional_services.all()]
-        additional_services = [
-            service(new_object, True) if service.clsname in additional_services_names else service(
-                new_object)
-            for service in CleaningAdditionalServices.getobjects()]
-        if not additional_services:
-            additional_services = []
+        # additional_services = [
+        #     service(new_object, True) if service.clsname in additional_services_names else service(new_object)
+        #     for service in CleaningAdditionalServices.getobjects()]
+        additional_services = []
+        for service in CleaningAdditionalServices.getobjects():
+            if service.clsname in additional_services_names:
+                additional_services.append(service(new_object, True))
+            elif service.clsname == CleaningAdditionalServices.BALCONY_CLEANING.value.clsname and new_object.windows:
+                additional_services.append(service(new_object, True))
+            else:
+                additional_services.append(service(new_object))
+        # if not additional_services:
+        #     additional_services = []
         new_object.additional_services = additional_services
         return new_object
 

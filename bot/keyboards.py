@@ -66,7 +66,7 @@ def build_keyboard_with_prices(keyboard, prices):
 
 def build_cleaning_addservices_message_and_keyboard(cleaning: Cleaning) -> Tuple[str, types.InlineKeyboardMarkup]:
     message = ""
-    message += ph.CHOOSE_WINDOWS
+    message += ph.CHOOSE_ADDITIONAL_SERVICES
     message += "\n\n"
 
     for index, service in enumerate(cleaning.additional_services, start=1):

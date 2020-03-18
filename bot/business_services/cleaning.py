@@ -17,14 +17,14 @@ def register_cleaning(cleaning_class):
         CLEANINGS[cleaning_class.cleaning_type] = cleaning_class
 
 
-class HelloMeta(type):
+class RegisterCleaningMeta(type):
     def __new__(mcs, name, bases, _dict):
         new_cls = super().__new__(mcs, name, bases, _dict)
         register_cleaning(new_cls)
         return new_cls
 
 
-class Cleaning(metaclass=HelloMeta):
+class Cleaning(metaclass=RegisterCleaningMeta):
     name: str = None
     cleaning_type: int = None
     price_without_windows: int = None
@@ -78,14 +78,16 @@ class Cleaning(metaclass=HelloMeta):
         # additional_services = [
         #     service(new_object, True) if service.clsname in additional_services_names else service(new_object)
         #     for service in CleaningAdditionalServices.getobjects()]
+
         additional_services = []
         for service in CleaningAdditionalServices.getobjects():
             if service.clsname in additional_services_names:
                 additional_services.append(service(new_object, True))
             elif service.clsname == CleaningAdditionalServices.BALCONY_CLEANING.value.clsname and new_object.windows:
-                additional_services.append(service(new_object, True))
+                continue
             else:
                 additional_services.append(service(new_object))
+
         # if not additional_services:
         #     additional_services = []
         new_object.additional_services = additional_services

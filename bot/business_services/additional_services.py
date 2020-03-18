@@ -149,12 +149,12 @@ class CleaningAdditionalServices(Enum):
     BALCONY_CLEANING = AdditionalServiceClass(
         "CLEANING_BALCONY_CLEANING",
         "Уборка на балконе",
-        "Уборка на балконе: %s",
+        "Уборка на балконе: от %s",
         {
-            CleaningTypes.SOFT_CLEANING.value: Price(500),
-            CleaningTypes.CAPITAL_CLEANING.value: Price(500),
-            CleaningTypes.THOROUGH_CLEANING.value: Price(500),
-            CleaningTypes.ABSOLUT_CLEANING.value: Price(500),
+            CleaningTypes.SOFT_CLEANING.value: Price(1500),
+            CleaningTypes.CAPITAL_CLEANING.value: Price(1500),
+            CleaningTypes.THOROUGH_CLEANING.value: Price(1500),
+            CleaningTypes.ABSOLUT_CLEANING.value: Price(1500),
         })
 
     VERY_DIRTY = AdditionalServiceClass(
@@ -171,7 +171,7 @@ class CleaningAdditionalServices(Enum):
     EQUIPMENT_DELIVERY_MOSCOW = AdditionalServiceClass(
         "CLEANING_EQUIPMENT_DELIVERY_MOSCOW",
         "Доставка оборудования по Москве",
-        "Доставка оборудования по Москве: %s",
+        "Доставка оборудования по Москве: от %s",
         {
             CleaningTypes.SOFT_CLEANING.value: Price(1000),
             CleaningTypes.CAPITAL_CLEANING.value: Price(1000),

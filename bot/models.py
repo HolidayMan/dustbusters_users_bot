@@ -50,16 +50,20 @@ class AdditionalService(models.Model):
     service_name = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
 
+    def __str__(self):
+        return self.name
+
 
 class CleaningOrder(models.Model):
     windows = models.BooleanField(blank=True, null=True)
-    type = models.IntegerField(blank=True, null=True)  # CleaningType
+    type = models.IntegerField(blank=True, null=True)
     visit = models.IntegerField(blank=True, null=True)
     place_size = models.IntegerField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
     additional_services = models.ManyToManyField("AdditionalService", related_name="cleaning_orders")
     user = models.ForeignKey("TgUser", on_delete=models.CASCADE, related_name="cleaning_orders")
+    promocode = models.ForeignKey("Promocode", on_delete=models.DO_NOTHING, related_name="cleaning_orders", blank=True, null=True)
 
     @classmethod
     def new_from_cleaning(cls, cleaning):
@@ -76,3 +80,12 @@ class CleaningOrder(models.Model):
         if cleaning.place_size:
             new_order.place_size = cleaning.place_size
         return new_order
+
+
+class Promocode(models.Model):
+    promocode = models.CharField(max_length=256)
+    type = models.IntegerField()
+    amount = models.IntegerField()
+
+    def __str__(self):
+        return self.promocode

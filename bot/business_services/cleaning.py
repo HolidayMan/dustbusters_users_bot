@@ -8,6 +8,7 @@ from .additional_services import CleaningAdditionalServices, AdditionalService
 from .enums import CleaningTypes, VisitTypes, CleaningNames, CleaningWindowsTypes, CleaningWindowsNames, VisitNames
 from .prices import SoftCleaningPrices, CapitalCleaningPrices, ThoroughCleaningPrices, AbsolutCleaningPrices
 from .amo_objects import save_lead_with_contact, Lead
+from .promocodes import Promocode
 
 CLEANINGS = {}
 
@@ -41,10 +42,11 @@ class Cleaning(metaclass=RegisterCleaningMeta):
     place_size: int = None
     model: ModelBase = CleaningOrder
     instance: CleaningOrder = None
+    promocode: Promocode = None
 
     def __init__(self, user: Union[TgUser, int], windows: bool, visit: int, place_size: int,
                  additional_services: List[AdditionalService] = None,
-                 visit_date: date = None, visit_time: time = None, instance: CleaningOrder = None):
+                 visit_date: date = None, visit_time: time = None, promocode: Promocode = None, instance: CleaningOrder = None):
         if isinstance(user, TgUser):
             self.user = user
         else:
@@ -54,6 +56,7 @@ class Cleaning(metaclass=RegisterCleaningMeta):
         self.place_size = place_size
         self.visit_date = visit_date
         self.visit_time = visit_time
+        self.promocode = promocode
 
         if not additional_services:
             self.additional_services = [service(self) for service in
@@ -71,13 +74,10 @@ class Cleaning(metaclass=RegisterCleaningMeta):
         place_size: int = instance.place_size
         visit_date: date = instance.date
         visit_time: time = instance.time
-
+        promocode: Promocode = Promocode.from_instance(instance.promocode) if instance.promocode else None
         new_object = cls(user=user, windows=windows, visit=visit, place_size=place_size,
-                         visit_date=visit_date, visit_time=visit_time, instance=instance)
+                         visit_date=visit_date, visit_time=visit_time, promocode=promocode, instance=instance)
         additional_services_names = [service.service_name for service in instance.additional_services.all()]
-        # additional_services = [
-        #     service(new_object, True) if service.clsname in additional_services_names else service(new_object)
-        #     for service in CleaningAdditionalServices.getobjects()]
 
         additional_services = []
         for service in CleaningAdditionalServices.getobjects():
@@ -88,8 +88,6 @@ class Cleaning(metaclass=RegisterCleaningMeta):
             else:
                 additional_services.append(service(new_object))
 
-        # if not additional_services:
-        #     additional_services = []
         new_object.additional_services = additional_services
         return new_object
 
@@ -127,6 +125,8 @@ class Cleaning(metaclass=RegisterCleaningMeta):
         total += self.get_cleaning_price()
         total += self.get_visit_price()
         total += self.calc_price_for_additional_services(total)
+        if self.promocode:
+            total = self.promocode.calc_discount(total)
         return total
 
     def save(self):
@@ -166,6 +166,8 @@ class CleaningDB:
                 self.instance.additional_services.remove(service.to_model())
             if service.chosen:
                 self.instance.additional_services.add(service.to_model())
+        if self.cleaning.promocode:
+            self.instance.promocode = self.cleaning.promocode.to_model()
 
         self.instance.save()
 

@@ -1,8 +1,6 @@
 import re
 from datetime import datetime, timedelta, time
 
-from telebot import types
-
 from bot.bot import bot
 from bot.keyboards import *
 import bot.phrases as ph

@@ -1,7 +1,11 @@
 from django.contrib import admin
-from .models import *
-from bot.business_services.utils import get_cleaning_class_from_type
+
 from bot.business_services.enums import CleaningNames, CleaningTypes, VisitTypes
+from .business_services.utils import get_cleaning_class_from_type
+from .models import *
+from .forms import PromocodeAdminForm
+
+admin.site.site_header = "Dustbusters User Bot"
 
 
 @admin.register(Contact)
@@ -17,7 +21,7 @@ class TgUserAdmin(admin.ModelAdmin):
 @admin.register(CleaningOrder)
 class CleaningOrderAdmin(admin.ModelAdmin):
     list_display = ("display_type", "user", "display_windows", "place_size", "display_trip", "date", "time",
-                    "display_additional_service")
+                    "display_additional_service", "promocode", "display_price")
 
     def display_additional_service(self, obj: CleaningOrder):
         return ", ".join(service.name for service in obj.additional_services.all()) if obj.additional_services.all() else "Не выбрано"
@@ -52,18 +56,35 @@ class CleaningOrderAdmin(admin.ModelAdmin):
         else:
             return "Не выбрано"
 
-    # def display_price(self, obj: CleaningOrder):
-    #     print(obj, "\n\n\n\n\n\n")
-    #     cleaning = get_cleaning_class_from_type(obj.type).from_instance(obj)
-    #     return f"{cleaning.calc_price()} ₽"
+    def display_price(self, obj: CleaningOrder):
+        cleaning = get_cleaning_class_from_type(obj.type).from_instance(obj)
+        return f"{cleaning.calc_price()} ₽"
 
     display_type.short_description = "Cleaning type"
     display_windows.short_description = "Windows"
     display_trip.short_description = "Trip time"
     display_additional_service.short_description = "Additional services"
-    # display_price.short_description = "Total price"
+    display_price.short_description = "Total price"
 
 
 @admin.register(AdditionalService)
 class AdditionalSeviceAdmin(admin.ModelAdmin):
     list_display = ("id", "name")
+
+
+@admin.register(Promocode)
+class PromocodeAdmin(admin.ModelAdmin):
+    list_display = ("promocode", "display_type", "amount")
+    form = PromocodeAdminForm
+
+    def display_type(self, obj):
+        if obj.type == 0:
+            return "Фиксированная скидка на сумму корзины"
+        else:
+            return "Процент скидки"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        return urls
+
+    display_type.short_description = "Type"

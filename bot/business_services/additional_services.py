@@ -26,6 +26,7 @@ class Percent(Price):
 
 
 class AdditionalService:
+    clsname: str = None
     prices: dict = None
     name: str = None
     price_string: str = None

@@ -54,3 +54,8 @@ class CallbacksTexts(Enum):
     ADDITIONAL_SERVICE_DECLINED = "additional_service_declined"
     CLEANING_CANCEL = "cleaning_cancel"
     ADDITIONAL_SERVICE_CHOSED = "additional_service_chosed"
+
+
+class PromocodeTypes(Enum):
+    NOT_PERCENT = 0
+    PERCENT = 1

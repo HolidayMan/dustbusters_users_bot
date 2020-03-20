@@ -9,9 +9,12 @@ from bot.models import CleaningOrder
 from bot.business_services.utils import (get_keyboards_buttons_text, get_last_db_obj, get_cleaning_type_from_name,
                                          has_message_text, set_state, get_current_state, get_windows_type_from_name,
                                          get_cleaning_class_from_type, get_visit_type_from_name, set_menu_state)
+from bot.business_services.promocodes import Promocode
+from bot.models import Promocode as PromocodeModel
+
 from .states import States
-from bot.business_services.enums import VisitTypes, CallbacksTexts, VisitNames, CleaningWindowsNames, \
-    CleaningWindowsTypes
+from bot.business_services.enums import (VisitTypes, CallbacksTexts, VisitNames, CleaningWindowsNames,
+    CleaningWindowsTypes, PromocodeTypes)
 
 
 def get_tomorrow_date() -> datetime:
@@ -194,7 +197,8 @@ def handle_additional_services_no(call):
     order = get_last_db_obj(model=CleaningOrder, user=message.chat)
     cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
     bot.edit_message_text(ph.SHOW_PRICE % cleaning.calc_price(), message.chat.id, message.message_id, parse_mode="HTML")
-    return order_recieved(message)
+    bot.register_next_step_handler(message, handle_promocode)
+    return bot.send_message(message.chat.id, ph.ENTER_PROMOCODE, parse_mode="HTML", reply_markup=DONT_HAVE_PROMOCODE)
 
 
 @bot.callback_query_handler(func=lambda call: get_current_state(
@@ -224,6 +228,26 @@ def handle_choose_additional_service(call):
                                  reply_markup=keyboard)
 
 
+def enter_promocode(message):
+    bot.register_next_step_handler(message, handle_promocode)
+    return bot.send_message(message.chat.id, ph.ENTER_PROMOCODE, parse_mode="HTML", reply_markup=DONT_HAVE_PROMOCODE)
+
+
+def handle_promocode(message):
+    if not has_message_text(message) or not PromocodeModel.objects.filter(promocode__iexact=message.text).exists():
+        bot.register_next_step_handler(message, handle_promocode)
+        return bot.send_message(message.chat.id, ph.NO_SUCH_PROMOCODE_EXISTS, parse_mode="HTML")
+
+    promocode_instance = PromocodeModel.objects.get(promocode__iexact=message.text)
+    promocode = Promocode.from_instance(promocode_instance)
+    order = get_last_db_obj(model=CleaningOrder, user=message.chat)
+    cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
+    cleaning.promocode = promocode
+    cleaning.save()
+
+    return order_recieved(message)
+
+
 def order_recieved(message: types.Message):
     order = get_last_db_obj(model=CleaningOrder, user=message.chat)
     cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
@@ -246,6 +270,11 @@ def order_recieved(message: types.Message):
 
     cleaning.save_to_amocrm()
 
+    if cleaning.promocode:
+        promocode_message = f"Промокод использован: {cleaning.promocode.promocode} ({f'-{cleaning.promocode.amount}%' if cleaning.promocode.promo_type == PromocodeTypes.PERCENT.value else f'-{cleaning.promocode.amount} ₽'})"
+    else:
+        promocode_message = "Промокод не введен"
+
     set_menu_state(message.chat.id)
     return bot.send_message(message.chat.id, ph.ORDER_RECIEVED % (cleaning.name,
                                                                   cleaning_type,
@@ -254,5 +283,6 @@ def order_recieved(message: types.Message):
                                                                   visit_date,
                                                                   visit_time,
                                                                   additional_services,
-                                                                  cleaning.calc_price()),
+                                                                  cleaning.calc_price(),
+                                                                  promocode_message),
                             parse_mode="HTML", reply_markup=MENU_KEYBOARD)

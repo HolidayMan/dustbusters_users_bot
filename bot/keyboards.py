@@ -24,8 +24,10 @@ NO_ADDSERVICE_BUTTON = types.InlineKeyboardButton("Нет🚫", callback_data=Ca
 ADDSERVICE_BACK_TO_MENU_BUTTON = types.InlineKeyboardButton("❌", callback_data=CallbacksTexts.CLEANING_CANCEL.value)
 ADDSERVICES_MAKE_ORDER_BUTTON = types.InlineKeyboardButton("Заказать", callback_data=CallbacksTexts.ADDITIONAL_SERVICE_CHOSED.value)
 
-BACK_TO_MENU_BUTTON = types.KeyboardButton("Назад")
+BACK_TO_MENU_BUTTON = types.KeyboardButton("Назад в меню")
 deleteKeyboard = types.ReplyKeyboardRemove()
+
+DONT_HAVE_PROMOCODE = types.KeyboardButton("У меня нет промокода")
 
 BACK_TO_MENU_KEYBOARD = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
 BACK_TO_MENU_KEYBOARD.add(BACK_TO_MENU_BUTTON)
@@ -49,6 +51,9 @@ TIME_RANGE_KEYBOARD.add(DAY_VISIT_BUTTON, EVENING_VISIT_BUTTON, NIGHT_VISIT_BUTT
 
 ADDSERVICE_KEYBOARD = types.InlineKeyboardMarkup(row_width=2)
 ADDSERVICE_KEYBOARD.add(YES_ADDSERVICE_BUTTON, NO_ADDSERVICE_BUTTON, ADDSERVICE_BACK_TO_MENU_BUTTON)
+
+PROMOCODE_HANDLING_KEYBOARD = types.ReplyKeyboardMarkup()
+PROMOCODE_HANDLING_KEYBOARD.add(DONT_HAVE_PROMOCODE)
 
 
 def build_keyboard_with_prices(keyboard, prices):

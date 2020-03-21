@@ -134,3 +134,4 @@ bot.log
 *.pem
 *.vdb
 /.handler-saves/
+bot/migrations

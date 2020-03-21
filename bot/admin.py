@@ -11,11 +11,13 @@ admin.site.site_header = "Dustbusters User Bot"
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
     list_display = ("user", "phone_number", "first_name", "last_name", "amo_id")
+    search_fields = ('phone_number', "first_name", "last_name")
 
 
 @admin.register(TgUser)
 class TgUserAdmin(admin.ModelAdmin):
     list_display = ("id", "tg_id", "first_name", "username", "date_joined")
+    search_fields = ('username', "first_name")
 
 
 @admin.register(CleaningOrder)
@@ -24,7 +26,8 @@ class CleaningOrderAdmin(admin.ModelAdmin):
                     "display_additional_service", "promocode")
 
     def display_additional_service(self, obj: CleaningOrder):
-        return ", ".join(service.name for service in obj.additional_services.all()) if obj.additional_services.all() else "Не выбрано"
+        return ", ".join(service.name for service in
+                         obj.additional_services.all()) if obj.additional_services.all() else "Не выбрано"
 
     def display_type(self, obj: CleaningOrder):
         if obj.type == CleaningTypes.SOFT_CLEANING.value:
@@ -72,10 +75,29 @@ class AdditionalSeviceAdmin(admin.ModelAdmin):
     list_display = ("id", "name")
 
 
+class PromocodeTypeFilter(admin.SimpleListFilter):
+    title = 'promocode type'
+
+    parameter_name = 'promocode_type'
+
+    related_filter_parameter = 'promocode__type'
+
+    def lookups(self, request, model_admin):
+        return (0, "Фиксированная скидка на сумму корзины"), (1, "Процент скидки")
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(type=self.value())
+        return queryset
+
+
 @admin.register(Promocode)
 class PromocodeAdmin(admin.ModelAdmin):
     list_display = ("promocode", "display_type", "amount")
     form = PromocodeAdminForm
+
+    search_fields = ('promocode',)
+    list_filter = (PromocodeTypeFilter, "amount")
 
     def display_type(self, obj):
         if obj.type == 0:

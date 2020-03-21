@@ -21,7 +21,7 @@ class TgUserAdmin(admin.ModelAdmin):
 @admin.register(CleaningOrder)
 class CleaningOrderAdmin(admin.ModelAdmin):
     list_display = ("display_type", "user", "display_windows", "place_size", "display_trip", "date", "time",
-                    "display_additional_service", "promocode", "display_price")
+                    "display_additional_service", "promocode")
 
     def display_additional_service(self, obj: CleaningOrder):
         return ", ".join(service.name for service in obj.additional_services.all()) if obj.additional_services.all() else "Не выбрано"
@@ -56,15 +56,15 @@ class CleaningOrderAdmin(admin.ModelAdmin):
         else:
             return "Не выбрано"
 
-    def display_price(self, obj: CleaningOrder):
-        cleaning = get_cleaning_class_from_type(obj.type).from_instance(obj)
-        return f"{cleaning.calc_price()} ₽"
+    # def display_price(self, obj: CleaningOrder):
+    #     cleaning = get_cleaning_class_from_type(obj.type).from_instance(obj)
+    #     return f"{cleaning.calc_price()} ₽"
 
     display_type.short_description = "Cleaning type"
     display_windows.short_description = "Windows"
     display_trip.short_description = "Trip time"
     display_additional_service.short_description = "Additional services"
-    display_price.short_description = "Total price"
+    # display_price.short_description = "Total price"
 
 
 @admin.register(AdditionalService)

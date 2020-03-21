@@ -198,7 +198,7 @@ def handle_additional_services_no(call):
     cleaning = get_cleaning_class_from_type(order.type).from_instance(order)
     bot.edit_message_text(ph.SHOW_PRICE % cleaning.calc_price(), message.chat.id, message.message_id, parse_mode="HTML")
     bot.register_next_step_handler(message, handle_promocode)
-    return bot.send_message(message.chat.id, ph.ENTER_PROMOCODE, parse_mode="HTML", reply_markup=DONT_HAVE_PROMOCODE)
+    return bot.send_message(message.chat.id, ph.ENTER_PROMOCODE, parse_mode="HTML", reply_markup=PROMOCODE_HANDLING_KEYBOARD)
 
 
 @bot.callback_query_handler(func=lambda call: get_current_state(
@@ -228,15 +228,14 @@ def handle_choose_additional_service(call):
                                  reply_markup=keyboard)
 
 
-def enter_promocode(message):
-    bot.register_next_step_handler(message, handle_promocode)
-    return bot.send_message(message.chat.id, ph.ENTER_PROMOCODE, parse_mode="HTML", reply_markup=DONT_HAVE_PROMOCODE)
-
-
+@handle_back_to_menu(delete=True, model=CleaningOrder)
 def handle_promocode(message):
+    if message.text == DONT_HAVE_PROMOCODE.text:
+        return order_recieved(message)
+
     if not has_message_text(message) or not PromocodeModel.objects.filter(promocode__iexact=message.text).exists():
         bot.register_next_step_handler(message, handle_promocode)
-        return bot.send_message(message.chat.id, ph.NO_SUCH_PROMOCODE_EXISTS, parse_mode="HTML")
+        return bot.send_message(message.chat.id, ph.NO_SUCH_PROMOCODE_EXISTS, parse_mode="HTML", reply_markup=PROMOCODE_HANDLING_KEYBOARD)
 
     promocode_instance = PromocodeModel.objects.get(promocode__iexact=message.text)
     promocode = Promocode.from_instance(promocode_instance)
